@@ -1,0 +1,2 @@
+# bitstring
+Go Bitstring module
