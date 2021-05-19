@@ -42,16 +42,9 @@ func Random(length int, rng *rand.Rand) *Bitstring {
 
 	a := bs.data[:len(bs.data)] // remove bounds-checking
 
-	// fill words with random values
-	switch uintsize {
-	case 32:
-		for i := range a {
-			a[i] = uint64(rng.Uint32())
-		}
-	case 64:
-		for i := range a {
-			a[i] = uint64(rng.Uint64())
-		}
+	// Fill words with random values
+	for i := range a {
+		a[i] = uint64(rng.Uint64())
 	}
 
 	// If the last word is not fully utilised, zero any out-of-bounds bits.
