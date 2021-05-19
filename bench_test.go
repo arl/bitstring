@@ -122,7 +122,6 @@ func BenchmarkRandom(b *testing.B) {
 func BenchmarkEquals(b *testing.B) {
 	rng := rand.New(rand.NewSource(99))
 	x := Random(1026, rng)
-	y := Copy(x)
 	var res bool
 	b.ResetTimer()
 	b.ReportAllocs()
@@ -153,4 +152,34 @@ func BenchmarkSetUintn(b *testing.B) {
 	}
 	b.StopTimer()
 	sink = bs
+}
+
+var vals = []string{
+	"1111111111111111",
+	"00000000000000000000000000000000000000000",
+	"1111111111111111111111111111111111111111111111111111",
+	"11111111111111111111111111111111111111111111111111111111100100111111100110010101010000010100111",
+	"1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111100100111111100110010101010000010100111",
+}
+
+func benchmarkOnesCount(b *testing.B, val string) {
+	bs, err := MakeFromString(val)
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	var ones int
+	b.ResetTimer()
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		ones = bs.OnesCount()
+	}
+	b.StopTimer()
+	sink = ones
+}
+
+func BenchmarkOnesCount(b *testing.B) {
+	for _, tt := range vals {
+		b.Run("", func(b *testing.B) { benchmarkOnesCount(b, tt) })
+	}
 }

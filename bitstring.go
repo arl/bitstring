@@ -140,11 +140,9 @@ func (bs *Bitstring) FlipBit(i int) {
 
 // OnesCount counts the number of one bits.
 func (bs *Bitstring) OnesCount() int {
+	var count int
 	for _, x := range bs.data {
-		for x != 0 {
-			x &= (x - 1) // Unsets the least significant on bit.
-			count++      // Count how many times we have to unset a bit before x equals zero.
-		}
+		count += bits.OnesCount64(x)
 	}
 	return count
 }
