@@ -17,3 +17,9 @@ func sprintsbits(val int64, nbits uint) string {
 	}
 	return fmt.Sprintf(fmt.Sprintf("%%0%db", nbits), val)
 }
+
+// prints a string representing the first n bits of the base-2 representation of x.
+//lint:ignore U1000 (unused but useful for debugging)
+func printbits(x, n uint) {
+	fmt.Printf(fmt.Sprintf("%%0%db\n", n), x)
+}
