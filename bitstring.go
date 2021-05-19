@@ -3,19 +3,9 @@
 package bitstring
 
 import (
-	"errors"
 	"fmt"
 	"math/big"
 	"math/rand"
-)
-
-var (
-	// ErrIndexOutOfRange is passed to panic if a bit index is out of range
-	ErrIndexOutOfRange = errors.New("Bitstring: index out of range")
-
-	// ErrInvalidLength is returned when the provided bitstring length is
-	// invalid.
-	ErrInvalidLength = errors.New("Bitstring: invalid length")
 )
 
 // Bitstring implements a fixed-length bit string.

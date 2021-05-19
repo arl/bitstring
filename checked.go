@@ -6,6 +6,6 @@ package bitstring
 // greater than bs.length.
 func (bs *Bitstring) mustExist(i uint) {
 	if i >= bs.length {
-		panic(ErrIndexOutOfRange)
+		panic("Bitstring: index out of range")
 	}
 }
