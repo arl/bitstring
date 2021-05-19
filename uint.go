@@ -9,11 +9,7 @@ import "fmt"
 func (bs *Bitstring) Uint8(i uint) uint8 {
 	bs.mustExist(i + 7)
 
-	i64 := uint64(i)
-	off := bitoffset(i64)
-	loword := bs.data[wordoffset(i64)] >> off
-	hiword := bs.data[wordoffset(i64+7)] & ((1 << off) - 1)
-	return uint8(loword | hiword<<(uintsize-off))
+	return uint8(bs.uint(uint64(i), 7))
 }
 
 // Uint16 returns the uint16 value represented by the 16 bits starting at the
@@ -21,11 +17,7 @@ func (bs *Bitstring) Uint8(i uint) uint8 {
 func (bs *Bitstring) Uint16(i uint) uint16 {
 	bs.mustExist(i + 15)
 
-	i64 := uint64(i)
-	off := bitoffset(i64)
-	loword := bs.data[wordoffset(i64)] >> off
-	hiword := bs.data[wordoffset(i64+15)] & ((1 << off) - 1)
-	return uint16(loword | hiword<<(uintsize-off))
+	return uint16(bs.uint(uint64(i), 15))
 }
 
 // Uint32 returns the uint32 value represented by the 32 bits starting at the
@@ -33,11 +25,7 @@ func (bs *Bitstring) Uint16(i uint) uint16 {
 func (bs *Bitstring) Uint32(i uint) uint32 {
 	bs.mustExist(i + 31)
 
-	i64 := uint64(i)
-	off := bitoffset(i64)
-	loword := bs.data[wordoffset(i64)] >> off
-	hiword := bs.data[wordoffset(i64+31)] & ((1 << off) - 1)
-	return uint32(loword | hiword<<(uintsize-off))
+	return uint32(bs.uint(uint64(i), 31))
 }
 
 // Uint64 returns the uint64 value represented by the 64 bits starting at the
@@ -56,6 +44,13 @@ func (bs *Bitstring) Uint64(i uint) uint64 {
 	loword := bs.data[w] >> off
 	hiword := bs.data[w+1] & ((1 << off) - 1)
 	return uint64(loword | hiword<<(uintsize-off))
+}
+
+func (bs *Bitstring) uint(i, nbits uint64) uint64 {
+	off := bitoffset(i)
+	loword := bs.data[wordoffset(i)] >> off
+	hiword := bs.data[wordoffset(i+nbits)] & ((1 << off) - 1)
+	return loword | hiword<<(uintsize-off)
 }
 
 // Uintn returns the n bits unsigned integer value represented by the n bits
@@ -96,6 +91,7 @@ func (bs *Bitstring) SetUint8(i uint, x uint8) {
 	k := wordoffset(i64 + 7)
 	if j == k {
 		// fast path: same word
+		lobit := bitoffset(i64)
 		neww := uint64(x) << lobit
 		msk := mask(lobit, lobit+8)
 		bs.data[j] = transferbits(bs.data[j], neww, msk)
