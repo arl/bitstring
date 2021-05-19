@@ -9,7 +9,7 @@ import (
 // conversion to unsigned integers
 //
 
-func TestBitstringUintn(t *testing.T) {
+func TestUintn(t *testing.T) {
 	tests := []struct {
 		input    string
 		nbits, i int
@@ -44,7 +44,7 @@ func TestBitstringUintn(t *testing.T) {
 	}
 }
 
-func TestBitstringUint64(t *testing.T) {
+func TestUint64(t *testing.T) {
 	tests := []struct {
 		input string
 		i     int
@@ -103,7 +103,7 @@ func TestBitstringUint64(t *testing.T) {
 	}
 }
 
-func TestBitstringUint32(t *testing.T) {
+func TestUint32(t *testing.T) {
 	tests := []struct {
 		input string
 		i     int
@@ -162,7 +162,7 @@ func TestBitstringUint32(t *testing.T) {
 	}
 }
 
-func TestBitstringUint16(t *testing.T) {
+func TestUint16(t *testing.T) {
 	tests := []struct {
 		input string
 		i     int
@@ -221,7 +221,7 @@ func TestBitstringUint16(t *testing.T) {
 	}
 }
 
-func TestBitstringUint8(t *testing.T) {
+func TestUint8(t *testing.T) {
 	tests := []struct {
 		input string
 		i     int
@@ -283,7 +283,7 @@ func TestBitstringUint8(t *testing.T) {
 //
 // conversion to signed integers
 //
-func TestBitstringInt32(t *testing.T) {
+func TestInt32(t *testing.T) {
 	tests := []struct {
 		input string
 		i     int
@@ -329,7 +329,7 @@ func TestBitstringInt32(t *testing.T) {
 	}
 }
 
-func TestBitstringInt16(t *testing.T) {
+func TestInt16(t *testing.T) {
 	tests := []struct {
 		input string
 		i     int
@@ -375,7 +375,7 @@ func TestBitstringInt16(t *testing.T) {
 	}
 }
 
-func TestBitstringInt8(t *testing.T) {
+func TestInt8(t *testing.T) {
 	tests := []struct {
 		input string
 		i     int
@@ -425,7 +425,7 @@ func TestBitstringInt8(t *testing.T) {
 // conversion from unsigned integers
 //
 
-func TestBitstringSetUintn(t *testing.T) {
+func TestSetUintn(t *testing.T) {
 	tests := []struct {
 		bs       string // starting bitstring
 		x        uint64 // value to set
@@ -499,7 +499,7 @@ func TestBitstringSetUintn(t *testing.T) {
 	}
 }
 
-func TestBitstringSetUint8(t *testing.T) {
+func TestSetUint8(t *testing.T) {
 	tests := []struct {
 		bs   string // starting bitstring
 		x    uint8  // value to set
@@ -568,7 +568,7 @@ func TestBitstringSetUint8(t *testing.T) {
 	}
 }
 
-func TestBitstringSetUint16(t *testing.T) {
+func TestSetUint16(t *testing.T) {
 	tests := []struct {
 		bs   string // starting bitstring
 		x    uint16 // value to set
@@ -637,7 +637,7 @@ func TestBitstringSetUint16(t *testing.T) {
 	}
 }
 
-func TestBitstringSetUint32(t *testing.T) {
+func TestSetUint32(t *testing.T) {
 	tests := []struct {
 		bs   string // starting bitstring
 		x    uint32 // value to set
@@ -706,7 +706,7 @@ func TestBitstringSetUint32(t *testing.T) {
 	}
 }
 
-func TestBitstringSetUint64(t *testing.T) {
+func TestSetUint64(t *testing.T) {
 	tests := []struct {
 		bs   string // starting bitstring
 		x    uint64 // value to set
@@ -775,7 +775,7 @@ func TestBitstringSetUint64(t *testing.T) {
 	}
 }
 
-func TestBitstringSetInt(t *testing.T) {
+func TestSetInt(t *testing.T) {
 	t.Run("SetInt8", func(t *testing.T) {
 		bs, _ := MakeFromString("00000000")
 		want := int8(math.MinInt8 / 3 * 2)

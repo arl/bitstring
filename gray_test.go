@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestBitstringGray8(t *testing.T) {
+func TestGray8(t *testing.T) {
 	tests := []struct {
 		input string
 		want  uint8
@@ -26,7 +26,7 @@ func TestBitstringGray8(t *testing.T) {
 	}
 }
 
-func TestBitstringGray16(t *testing.T) {
+func TestGray16(t *testing.T) {
 	tests := []struct {
 		input string
 		want  uint16
@@ -47,7 +47,7 @@ func TestBitstringGray16(t *testing.T) {
 	}
 }
 
-func TestBitstringGray32(t *testing.T) {
+func TestGray32(t *testing.T) {
 	tests := []struct {
 		input string
 		want  uint32
@@ -68,7 +68,7 @@ func TestBitstringGray32(t *testing.T) {
 	}
 }
 
-func TestBitstringGray64(t *testing.T) {
+func TestGray64(t *testing.T) {
 	tests := []struct {
 		input string
 		want  uint64
@@ -89,7 +89,7 @@ func TestBitstringGray64(t *testing.T) {
 	}
 }
 
-func TestBitstringGrayn(t *testing.T) {
+func TestGrayn(t *testing.T) {
 	tests := []struct {
 		input string
 		nbits int

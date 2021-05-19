@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestBitstringCreation(t *testing.T) {
+func TestCreation(t *testing.T) {
 	// Check that a bit string is constructed correctly, with
 	// the correct length and all bits initially set to zero.
 	bs := New(100)
@@ -17,14 +17,14 @@ func TestBitstringCreation(t *testing.T) {
 	}
 }
 
-func TestBitstringCreateRandomBitstring(t *testing.T) {
+func TestCreateRandomBitstring(t *testing.T) {
 	rng := rand.New(rand.NewSource(99))
 	// Check that a random bit string of the correct length is constructed.
 	bs := Random(100, rng)
 	assert.Equalf(t, bs.Len(), 100, "want Bitstring length 100, got: %v", bs.Len())
 }
 
-func TestBitstringSetBits(t *testing.T) {
+func TestSetBits(t *testing.T) {
 	// Make sure that bits are set correctly.
 	bs := New(5)
 
@@ -43,7 +43,7 @@ func TestBitstringSetBits(t *testing.T) {
 	assert.False(t, bs.Bit(4), "Bit 4 should be unset.")
 }
 
-func TestBitstringFlipBits(t *testing.T) {
+func TestFlipBits(t *testing.T) {
 	// Make sure bit-flipping works as expected.
 	bs := New(5)
 
@@ -54,7 +54,7 @@ func TestBitstringFlipBits(t *testing.T) {
 	assert.False(t, bs.Bit(2), "Flipping set bit failed.")
 }
 
-func TestBitstringToString(t *testing.T) {
+func TestToString(t *testing.T) {
 	// Checks that string representations are correctly generated.
 	bs := New(10)
 
@@ -68,7 +68,7 @@ func TestBitstringToString(t *testing.T) {
 	assert.Equalf(t, want, got, "Incorrect string representation, want %s, got: %s", want, got)
 }
 
-func TestBitstringParsing(t *testing.T) {
+func TestParsing(t *testing.T) {
 	// Checks that the String-parsing constructor works correctly.
 	// Use a 33-bit string to check that word boundaries are dealt with correctly.
 	want := "111010101110101100010100101000101"
@@ -79,7 +79,7 @@ func TestBitstringParsing(t *testing.T) {
 }
 
 // Checks that integer conversion is correct.
-func TestBitstringToNumber(t *testing.T) {
+func TestToNumber(t *testing.T) {
 	bs := New(10)
 
 	bs.SetBit(0)
@@ -89,7 +89,7 @@ func TestBitstringToNumber(t *testing.T) {
 	assert.EqualValuesf(t, 513, bint.Int64(), "Incorrect big.Int conversion, want %v, got: %v", 513, bint.Int64())
 }
 
-func TestBitstringOnesCount(t *testing.T) {
+func TestOnesCount(t *testing.T) {
 	// Checks that the bit string can correctly count its number of set bits.
 	bs := New(64)
 	assert.Zerof(t, bs.OnesCount(), "Initial string should have no 1s, got: %v, repr \"%v\"", bs.OnesCount(), bs)
@@ -105,7 +105,7 @@ func TestBitstringOnesCount(t *testing.T) {
 }
 
 // Checks that the bit string can correctly count its number of unset bits.
-func TestBitstringZeroesCount(t *testing.T) {
+func TestZeroesCount(t *testing.T) {
 	bs := New(12)
 	assert.EqualValuesf(t, 12, bs.ZeroesCount(), "Initial string should have no 1s, got: %v, repr \"%v\"", bs.ZeroesCount(), bs)
 
@@ -118,7 +118,7 @@ func TestBitstringZeroesCount(t *testing.T) {
 	assert.EqualValuesf(t, 7, setBits, "want set bits = 7, got: %v", setBits)
 }
 
-func TestBitstringClone(t *testing.T) {
+func TestClone(t *testing.T) {
 	rng := rand.New(rand.NewSource(99))
 	bs := Random(2000, rng)
 	bs.SetBit(3)
@@ -136,7 +136,7 @@ func TestBitstringClone(t *testing.T) {
 	assert.False(t, cpy.Bit(2) == bs.Bit(2), "copy and original are not independent from each other")
 }
 
-func TestBitstringEquality(t *testing.T) {
+func TestEquality(t *testing.T) {
 	bs := New(10)
 	bs.SetBit(2)
 	bs.SetBit(5)
@@ -161,7 +161,7 @@ func TestBitstringEquality(t *testing.T) {
 	assert.False(t, bs2.Equals(bs))
 }
 
-func TestBitstringFromString(t *testing.T) {
+func TestFromString(t *testing.T) {
 	tests := []struct {
 		name  string
 		str   string
@@ -189,7 +189,7 @@ func TestBitstringFromString(t *testing.T) {
 	}
 }
 
-func TestBitstringSetBit(t *testing.T) {
+func TestSetBit(t *testing.T) {
 	bs := New(1)
 	t.Run("panics on index too high", func(t *testing.T) {
 		// The index of an individual bit must be within the range 0 to
@@ -198,7 +198,7 @@ func TestBitstringSetBit(t *testing.T) {
 	})
 }
 
-func TestBitstringSwapRange(t *testing.T) {
+func TestSwapRange(t *testing.T) {
 	tests := []struct {
 		x, y          string
 		start, length int
