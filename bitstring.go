@@ -222,11 +222,8 @@ func (bs *Bitstring) String() string {
 	return string(b)
 }
 
-// Copy creates and returns a new Bitstring that is a copy of src.
-//
-// TODO: rename Clone and make Copy a free functions like copy builtin
-// (bitstring.Copy(dst, src)) with fewer allocation possible (possibly 0).
-func Copy(src *Bitstring) *Bitstring {
+// Clone creates and returns a new Bitstring that is a copy of src.
+func Clone(src *Bitstring) *Bitstring {
 	dst := make([]uint64, len(src.data))
 	copy(dst, src.data)
 	return &Bitstring{

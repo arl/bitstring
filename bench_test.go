@@ -122,6 +122,7 @@ func BenchmarkRandom(b *testing.B) {
 func BenchmarkEquals(b *testing.B) {
 	rng := rand.New(rand.NewSource(99))
 	x := Random(1026, rng)
+	y := Clone(x)
 	var res bool
 	b.ResetTimer()
 	b.ReportAllocs()
@@ -178,6 +179,10 @@ func benchmarkOnesCount(b *testing.B, val string) {
 	sink = ones
 }
 
+
+// 	var ones uint
+// 	b.ResetTimer()
+// 	b.ReportAllocs()
 func BenchmarkOnesCount(b *testing.B) {
 	for _, tt := range vals {
 		b.Run("", func(b *testing.B) { benchmarkOnesCount(b, tt) })

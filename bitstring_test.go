@@ -118,13 +118,13 @@ func TestBitstringZeroesCount(t *testing.T) {
 	assert.EqualValuesf(t, 7, setBits, "want set bits = 7, got: %v", setBits)
 }
 
-func TestBitstringCopy(t *testing.T) {
+func TestBitstringClone(t *testing.T) {
 	rng := rand.New(rand.NewSource(99))
 	bs := Random(2000, rng)
 	bs.SetBit(3)
 	bs.SetBit(7)
 	bs.SetBit(8)
-	cpy := Copy(bs)
+	cpy := Clone(bs)
 
 	// Check the copy is a bit-for-bit duplicate.
 	for i := 0; i < bs.Len(); i++ {
@@ -146,11 +146,9 @@ func TestBitstringEquality(t *testing.T) {
 	assert.False(t, bs.Equals(nil), "Valid Bitstring should never equals nil.")
 	assert.False(t, bs.Equals(&Bitstring{}), "Bitstring should not equals another instance")
 
-	cpy := Copy(bs)
+	cpy := Clone(bs)
 	assert.Truef(t, cpy.Equals(bs), "Freshly copied Bitstring should equals original, bs=%s copy=%s", bs, cpy)
 
-	// Changing one of the objects should result in them no longer being
-	// considered equal.
 	cpy.FlipBit(0)
 	assert.Falsef(t, cpy.Equals(bs), "bs=%s copy=%s", bs, cpy)
 
