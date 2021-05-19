@@ -12,7 +12,7 @@ import (
 func TestBitstringUintn(t *testing.T) {
 	tests := []struct {
 		input    string
-		nbits, i uint
+		nbits, i int
 		want     uint64
 	}{
 		// LSB and MSB are both on the same word
@@ -47,7 +47,7 @@ func TestBitstringUintn(t *testing.T) {
 func TestBitstringUint64(t *testing.T) {
 	tests := []struct {
 		input string
-		i     uint
+		i     int
 		want  uint64
 	}{
 		// LSB and MSB are both on the same word
@@ -106,7 +106,7 @@ func TestBitstringUint64(t *testing.T) {
 func TestBitstringUint32(t *testing.T) {
 	tests := []struct {
 		input string
-		i     uint
+		i     int
 		want  uint32
 	}{
 		// LSB and MSB are both on the same word
@@ -165,7 +165,7 @@ func TestBitstringUint32(t *testing.T) {
 func TestBitstringUint16(t *testing.T) {
 	tests := []struct {
 		input string
-		i     uint
+		i     int
 		want  uint16
 	}{
 		// LSB and MSB are both on the same word
@@ -224,7 +224,7 @@ func TestBitstringUint16(t *testing.T) {
 func TestBitstringUint8(t *testing.T) {
 	tests := []struct {
 		input string
-		i     uint
+		i     int
 		want  uint8
 	}{
 		// LSB and MSB are both on the same word
@@ -286,7 +286,7 @@ func TestBitstringUint8(t *testing.T) {
 func TestBitstringInt32(t *testing.T) {
 	tests := []struct {
 		input string
-		i     uint
+		i     int
 		want  int32
 	}{
 		// LSB and MSB are both on the same word
@@ -332,7 +332,7 @@ func TestBitstringInt32(t *testing.T) {
 func TestBitstringInt16(t *testing.T) {
 	tests := []struct {
 		input string
-		i     uint
+		i     int
 		want  int16
 	}{
 		// LSB and MSB are both on the same word
@@ -378,7 +378,7 @@ func TestBitstringInt16(t *testing.T) {
 func TestBitstringInt8(t *testing.T) {
 	tests := []struct {
 		input string
-		i     uint
+		i     int
 		want  int8
 	}{
 		// LSB and MSB are both on the same word
@@ -429,7 +429,7 @@ func TestBitstringSetUintn(t *testing.T) {
 	tests := []struct {
 		bs       string // starting bitstring
 		x        uint64 // value to set
-		nbits, i uint
+		nbits, i int
 		want     string
 	}{
 		// LSB and MSB are both on the same word
@@ -503,7 +503,7 @@ func TestBitstringSetUint8(t *testing.T) {
 	tests := []struct {
 		bs   string // starting bitstring
 		x    uint8  // value to set
-		i    uint   // bit index where to set it
+		i    int    // bit index where to set it
 		want string
 	}{
 		// LSB and MSB are both on the same word
@@ -572,7 +572,7 @@ func TestBitstringSetUint16(t *testing.T) {
 	tests := []struct {
 		bs   string // starting bitstring
 		x    uint16 // value to set
-		i    uint   // bit index where to set it
+		i    int    // bit index where to set it
 		want string
 	}{
 		// LSB and MSB are both on the same word
@@ -641,7 +641,7 @@ func TestBitstringSetUint32(t *testing.T) {
 	tests := []struct {
 		bs   string // starting bitstring
 		x    uint32 // value to set
-		i    uint   // bit index where to set it
+		i    int    // bit index where to set it
 		want string
 	}{
 		// LSB and MSB are both on the same word
@@ -710,7 +710,7 @@ func TestBitstringSetUint64(t *testing.T) {
 	tests := []struct {
 		bs   string // starting bitstring
 		x    uint64 // value to set
-		i    uint   // bit index where to set it
+		i    int    // bit index where to set it
 		want string
 	}{
 		// LSB and MSB are both on the same word

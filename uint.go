@@ -6,7 +6,7 @@ import "fmt"
 
 // Uint8 returns the uint8 value represented by the 8 bits starting at the
 // given bit. It panics if there are not enough bits.
-func (bs *Bitstring) Uint8(i uint) uint8 {
+func (bs *Bitstring) Uint8(i int) uint8 {
 	bs.mustExist(i + 7)
 
 	return uint8(bs.uint(uint64(i), 7))
@@ -14,7 +14,7 @@ func (bs *Bitstring) Uint8(i uint) uint8 {
 
 // Uint16 returns the uint16 value represented by the 16 bits starting at the
 // given bit. It panics if there are not enough bits.
-func (bs *Bitstring) Uint16(i uint) uint16 {
+func (bs *Bitstring) Uint16(i int) uint16 {
 	bs.mustExist(i + 15)
 
 	return uint16(bs.uint(uint64(i), 15))
@@ -22,7 +22,7 @@ func (bs *Bitstring) Uint16(i uint) uint16 {
 
 // Uint32 returns the uint32 value represented by the 32 bits starting at the
 // given bit. It panics if there are not enough bits.
-func (bs *Bitstring) Uint32(i uint) uint32 {
+func (bs *Bitstring) Uint32(i int) uint32 {
 	bs.mustExist(i + 31)
 
 	return uint32(bs.uint(uint64(i), 31))
@@ -30,7 +30,7 @@ func (bs *Bitstring) Uint32(i uint) uint32 {
 
 // Uint64 returns the uint64 value represented by the 64 bits starting at the
 // given bit. It panics if there are not enough bits.
-func (bs *Bitstring) Uint64(i uint) uint64 {
+func (bs *Bitstring) Uint64(i int) uint64 {
 	bs.mustExist(i + 63)
 
 	// fast path: i is a multiple of 64
@@ -57,7 +57,7 @@ func (bs *Bitstring) uint(i, nbits uint64) uint64 {
 // starting at the bit index i. It panics if there aren't enough bits in bs or
 // if n is greater than the size of a machine word.
 // TODO: reverse order of nbits and i params
-func (bs *Bitstring) Uintn(n, i uint) uint64 {
+func (bs *Bitstring) Uintn(n, i int) uint64 {
 	if n > uintsize || n < 1 {
 		panic(fmt.Sprintf("Uintn supports unsigned integers from 1 to %d bits long", uintsize))
 	}
@@ -82,7 +82,7 @@ func (bs *Bitstring) Uintn(n, i uint) uint64 {
 
 // SetUint8 sets the 8 bits starting at i with the value of x. It panics if
 // there are not enough bits.
-func (bs *Bitstring) SetUint8(i uint, x uint8) {
+func (bs *Bitstring) SetUint8(i int, x uint8) {
 	bs.mustExist(i + 7)
 
 	i64 := uint64(i)
@@ -106,7 +106,7 @@ func (bs *Bitstring) SetUint8(i uint, x uint8) {
 
 // SetUint16 sets the 16 bits starting at i with the value of x. It panics if
 // there are not enough bits.
-func (bs *Bitstring) SetUint16(i uint, x uint16) {
+func (bs *Bitstring) SetUint16(i int, x uint16) {
 	bs.mustExist(i + 15)
 
 	i64 := uint64(i)
@@ -129,7 +129,7 @@ func (bs *Bitstring) SetUint16(i uint, x uint16) {
 
 // SetUint32 sets the 32 bits starting at i with the value of x. It panics if
 // there are not enough bits.
-func (bs *Bitstring) SetUint32(i uint, x uint32) {
+func (bs *Bitstring) SetUint32(i int, x uint32) {
 	bs.mustExist(i + 31)
 
 	i64 := uint64(i)
@@ -152,7 +152,7 @@ func (bs *Bitstring) SetUint32(i uint, x uint32) {
 
 // SetUint64 sets the 64 bits starting at i with the value of x. It panics if
 // there are not enough bits.
-func (bs *Bitstring) SetUint64(i uint, x uint64) {
+func (bs *Bitstring) SetUint64(i int, x uint64) {
 	bs.mustExist(i + 63)
 
 	i64 := uint64(i)
@@ -183,7 +183,7 @@ func (bs *Bitstring) SetUint64(i uint, x uint64) {
 // SetUintn sets the n bits starting at i with the first n bits of value x.
 // It panics if there aren't enough bits in bs or if n is greater than
 // the size of a machine word.
-func (bs *Bitstring) SetUintn(n, i uint, x uint64) {
+func (bs *Bitstring) SetUintn(n, i int, x uint64) {
 	if n > uintsize || n < 1 {
 		panic(fmt.Sprintf("SetUintn supports unsigned integers from 1 to %d bits long", uintsize))
 	}

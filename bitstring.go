@@ -5,6 +5,7 @@ package bitstring
 import (
 	"fmt"
 	"math/big"
+	"math/bits"
 	"math/rand"
 )
 
@@ -15,7 +16,7 @@ import (
 // approach of using an array of booleans.
 type Bitstring struct {
 	// length in bits of the bit string
-	length uint
+	length int
 
 	// bits are packed in an array of uint64.
 	data []uint64
@@ -23,7 +24,7 @@ type Bitstring struct {
 
 // New creates a bit string of the specified length (in bits) with all bits
 // initially set to zero (off).
-func New(length uint) *Bitstring {
+func New(length int) *Bitstring {
 	return &Bitstring{
 		length: length,
 		data:   make([]uint64, (length+64-1)/64),
@@ -36,7 +37,7 @@ func New(length uint) *Bitstring {
 // Random randomly sets the uint32 values of the underlying slice, so it should
 // be faster than creating a bit string and then randomly setting each
 // individual bits.
-func Random(length uint, rng *rand.Rand) *Bitstring {
+func Random(length int, rng *rand.Rand) *Bitstring {
 	bs := New(length)
 
 	a := bs.data[:len(bs.data)] // remove bounds-checking
@@ -67,14 +68,14 @@ func Random(length uint, rng *rand.Rand) *Bitstring {
 // MakeFromString returns the corresponding Bitstring for the given string of 1s
 // and 0s in big endian order.
 func MakeFromString(s string) (*Bitstring, error) {
-	bs := New(uint(len(s)))
+	bs := New(len(s))
 
 	for i, c := range s {
 		switch c {
 		case '0':
 			continue
 		case '1':
-			bs.SetBit(uint(len(s) - i - 1))
+			bs.SetBit(len(s) - i - 1)
 		default:
 			return nil, fmt.Errorf("illegal character at position %v: %#U", i, c)
 		}
@@ -95,7 +96,7 @@ func (bs *Bitstring) Data() []uint64 {
 // Bit returns a boolean indicating wether the bit at index i is set or not.
 //
 // If i is greater than the bitstring length, Bit will panic.
-func (bs *Bitstring) Bit(i uint) bool {
+func (bs *Bitstring) Bit(i int) bool {
 	bs.mustExist(i)
 
 	w := wordoffset(uint64(i))
@@ -107,7 +108,7 @@ func (bs *Bitstring) Bit(i uint) bool {
 // SetBit sets the bit at index i.
 //
 // If i is greater than the bitstring length, SetBit will panic.
-func (bs *Bitstring) SetBit(i uint) {
+func (bs *Bitstring) SetBit(i int) {
 	bs.mustExist(i)
 
 	w := wordoffset(uint64(i))
@@ -118,7 +119,7 @@ func (bs *Bitstring) SetBit(i uint) {
 // ClearBit clears the bit at index i.
 //
 // If i is greater than the bitstring length, ClearBit will panic.
-func (bs *Bitstring) ClearBit(i uint) {
+func (bs *Bitstring) ClearBit(i int) {
 	bs.mustExist(i)
 
 	w := wordoffset(uint64(i))
@@ -129,7 +130,7 @@ func (bs *Bitstring) ClearBit(i uint) {
 // FlipBit flips (i.e toggles) the bit at index i.
 //
 // If i is greater than the bitstring length, FlipBit will panic.
-func (bs *Bitstring) FlipBit(i uint) {
+func (bs *Bitstring) FlipBit(i int) {
 	bs.mustExist(i)
 
 	w := wordoffset(uint64(i))
@@ -138,8 +139,7 @@ func (bs *Bitstring) FlipBit(i uint) {
 }
 
 // OnesCount counts the number of one bits.
-func (bs *Bitstring) OnesCount() uint {
-	var count uint
+func (bs *Bitstring) OnesCount() int {
 	for _, x := range bs.data {
 		for x != 0 {
 			x &= (x - 1) // Unsets the least significant on bit.
@@ -150,7 +150,7 @@ func (bs *Bitstring) OnesCount() uint {
 }
 
 // ZeroesCount counts the number of zero bits.
-func (bs *Bitstring) ZeroesCount() uint {
+func (bs *Bitstring) ZeroesCount() int {
 	return bs.length - bs.OnesCount()
 }
 
@@ -174,7 +174,7 @@ func minuint(x, y uint64) uint64 {
 //
 // Both Bitstring may have different length the bit with index start+lenght must
 // be valid on both or SwapRange will panic.
-func SwapRange(bs1, bs2 *Bitstring, start, length uint) {
+func SwapRange(bs1, bs2 *Bitstring, start, length int) {
 	bs1.mustExist(start + length - 1)
 	bs2.mustExist(start + length - 1)
 
@@ -214,7 +214,7 @@ func swapBits(x, y *Bitstring, w, mask uint64) {
 // String returns a string representation of bs in big endian order.
 func (bs *Bitstring) String() string {
 	b := make([]byte, bs.length)
-	for i := uint(0); i < bs.length; i++ {
+	for i := 0; i < bs.length; i++ {
 		if bs.Bit(i) {
 			b[bs.length-1-i] = '1'
 		} else {

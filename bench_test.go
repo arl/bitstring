@@ -7,7 +7,7 @@ import (
 
 var sink interface{}
 
-func benchmarkUintn(b *testing.B, nbits, i uint) {
+func benchmarkUintn(b *testing.B, nbits, i int) {
 	b.ReportAllocs()
 	bs, _ := MakeFromString("0000000000000000000000000000000101000000000000000000000000000000")
 	var v uint64
@@ -18,7 +18,7 @@ func benchmarkUintn(b *testing.B, nbits, i uint) {
 	sink = v
 }
 
-func benchmarkUint64(b *testing.B, i uint) {
+func benchmarkUint64(b *testing.B, i int) {
 	b.ReportAllocs()
 	bs, _ := MakeFromString("00000000000000000000000000000001010000000000000000000000000000000")
 	var v uint64
@@ -29,7 +29,7 @@ func benchmarkUint64(b *testing.B, i uint) {
 	sink = v
 }
 
-func benchmarkUint32(b *testing.B, i uint) {
+func benchmarkUint32(b *testing.B, i int) {
 	b.ReportAllocs()
 	bs, _ := MakeFromString("0000000000000000000000000000000101000000000000000000000000000000")
 	var v uint32
@@ -40,7 +40,7 @@ func benchmarkUint32(b *testing.B, i uint) {
 	sink = v
 }
 
-func benchmarkUint16(b *testing.B, i uint) {
+func benchmarkUint16(b *testing.B, i int) {
 	b.ReportAllocs()
 	bs, _ := MakeFromString("0000000000000000000000000000000101000000000000000000000000000000")
 	var v uint16
@@ -51,7 +51,7 @@ func benchmarkUint16(b *testing.B, i uint) {
 	sink = v
 }
 
-func benchmarkUint8(b *testing.B, i uint) {
+func benchmarkUint8(b *testing.B, i int) {
 	b.ReportAllocs()
 	bs, _ := MakeFromString("0000000000000000000000000000000101000000000000000000000000000000")
 	var v uint8

@@ -13,7 +13,7 @@ func TestBitstringCreation(t *testing.T) {
 	bs := New(100)
 	assert.Equalf(t, bs.Len(), 100, "want Bitstring length 100, got: %v", bs.Len())
 	for i := 0; i < bs.Len(); i++ {
-		assert.False(t, bs.Bit(uint(i)), "Bit ", i, " should not be set.")
+		assert.False(t, bs.Bit(i), "Bit ", i, " should not be set.")
 	}
 }
 
@@ -127,7 +127,7 @@ func TestBitstringCopy(t *testing.T) {
 	cpy := Copy(bs)
 
 	// Check the copy is a bit-for-bit duplicate.
-	for i := uint(0); i < uint(bs.Len()); i++ {
+	for i := 0; i < bs.Len(); i++ {
 		assert.Equalf(t, bs.Bit(i), cpy.Bit(i), "copy differs original at bit %d", i)
 	}
 
@@ -203,7 +203,7 @@ func TestBitstringSetBit(t *testing.T) {
 func TestBitstringSwapRange(t *testing.T) {
 	tests := []struct {
 		x, y          string
-		start, length uint
+		start, length int
 		wantx, wanty  string
 	}{
 		{

@@ -92,7 +92,7 @@ func TestBitstringGray64(t *testing.T) {
 func TestBitstringGrayn(t *testing.T) {
 	tests := []struct {
 		input string
-		nbits uint
+		nbits int
 		want  uint64
 	}{
 		{input: "00000000", nbits: 1, want: 0},
