@@ -1,6 +1,8 @@
 package bitstring
 
+import "math"
+
 const (
-	uintsize = 32 << (^uint(0) >> 32 & 1) // 32 or 64
-	maxuint  = ^uint(0)
+	uintsize = 64
+	maxuint  = math.MaxUint64
 )

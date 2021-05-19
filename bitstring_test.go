@@ -320,10 +320,8 @@ func TestBitstringSwapRange(t *testing.T) {
 			assert.NoError(t, err2)
 			SwapRange(x, y, tt.start, tt.length)
 
-			assert.Equalf(t, tt.wantx, x.String(),
-				"want %s, got %s", tt.wantx, x.String())
-			assert.Equalf(t, tt.wanty, y.String(),
-				"want %s, got %s", tt.wanty, y.String())
+			assert.Equalf(t, tt.wantx, x.String(), "want %s, got %s", tt.wantx, x.String())
+			assert.Equalf(t, tt.wanty, y.String(), "want %s, got %s", tt.wanty, y.String())
 		})
 	}
 }

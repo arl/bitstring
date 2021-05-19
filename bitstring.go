@@ -11,11 +11,11 @@ import (
 
 var (
 	// ErrIndexOutOfRange is passed to panic if a bit index is out of range
-	ErrIndexOutOfRange = errors.New("bitstring.Bitstring: index out of range")
+	ErrIndexOutOfRange = errors.New("Bitstring: index out of range")
 
 	// ErrInvalidLength is returned when the provided bitstring length is
 	// invalid.
-	ErrInvalidLength = errors.New("bitstring.Bitstring: invalid length")
+	ErrInvalidLength = errors.New("Bitstring: invalid length")
 )
 
 // Bitstring implements a fixed-length bit string.
@@ -27,8 +27,8 @@ type Bitstring struct {
 	// length in bits of the bit string
 	length uint
 
-	// bits are packed in an array of 32-bit ints.
-	data []uint
+	// bits are packed in an array of uint64.
+	data []uint64
 }
 
 // New creates a bit string of the specified length (in bits) with all bits
@@ -36,7 +36,7 @@ type Bitstring struct {
 func New(length uint) *Bitstring {
 	return &Bitstring{
 		length: length,
-		data:   make([]uint, (length+uintsize-1)/uintsize),
+		data:   make([]uint64, (length+64-1)/64),
 	}
 }
 
@@ -55,20 +55,20 @@ func Random(length uint, rng *rand.Rand) *Bitstring {
 	switch uintsize {
 	case 32:
 		for i := range a {
-			a[i] = uint(rng.Uint32())
+			a[i] = uint64(rng.Uint32())
 		}
 	case 64:
 		for i := range a {
-			a[i] = uint(rng.Uint64())
+			a[i] = uint64(rng.Uint64())
 		}
 	}
 
 	// If the last word is not fully utilised, zero any out-of-bounds bits.
 	// This is necessary because OnesCount and ZeroesCount count the
 	// out-of-bounds bits.
-	nused := bitoffset(length)
+	nused := bitoffset(uint64(length))
 	if nused != 0 {
-		mask := lomask(uint(nused))
+		mask := lomask(uint64(nused))
 		a[len(a)-1] &= mask
 	}
 	return bs
@@ -98,7 +98,7 @@ func (bs *Bitstring) Len() int {
 }
 
 // Data returns the bitstring underlying slice.
-func (bs *Bitstring) Data() []uint {
+func (bs *Bitstring) Data() []uint64 {
 	return bs.data
 }
 
@@ -108,9 +108,9 @@ func (bs *Bitstring) Data() []uint {
 func (bs *Bitstring) Bit(i uint) bool {
 	bs.mustExist(i)
 
-	w := wordoffset(i)
-	off := bitoffset(i)
-	mask := bitmask(uint(off))
+	w := wordoffset(uint64(i))
+	off := bitoffset(uint64(i))
+	mask := bitmask(off)
 	return (bs.data[w] & mask) != 0
 }
 
@@ -120,9 +120,9 @@ func (bs *Bitstring) Bit(i uint) bool {
 func (bs *Bitstring) SetBit(i uint) {
 	bs.mustExist(i)
 
-	w := wordoffset(i)
-	off := bitoffset(i)
-	bs.data[w] |= bitmask(uint(off))
+	w := wordoffset(uint64(i))
+	off := bitoffset(uint64(i))
+	bs.data[w] |= bitmask(off)
 }
 
 // ClearBit clears the bit at index i.
@@ -131,9 +131,9 @@ func (bs *Bitstring) SetBit(i uint) {
 func (bs *Bitstring) ClearBit(i uint) {
 	bs.mustExist(i)
 
-	w := wordoffset(i)
-	off := bitoffset(i)
-	bs.data[w] &= ^bitmask(uint(off))
+	w := wordoffset(uint64(i))
+	off := bitoffset(uint64(i))
+	bs.data[w] &= ^bitmask(off)
 }
 
 // FlipBit flips (i.e toggles) the bit at index i.
@@ -142,8 +142,8 @@ func (bs *Bitstring) ClearBit(i uint) {
 func (bs *Bitstring) FlipBit(i uint) {
 	bs.mustExist(i)
 
-	w := wordoffset(i)
-	off := bitoffset(i)
+	w := wordoffset(uint64(i))
+	off := bitoffset(uint64(i))
 	bs.data[w] ^= (1 << off)
 }
 
@@ -173,7 +173,7 @@ func (bs *Bitstring) BigInt() *big.Int {
 	return bi
 }
 
-func minuint(x, y uint) uint {
+func minuint(x, y uint64) uint64 {
 	if x < y {
 		return x
 	}
@@ -189,11 +189,12 @@ func SwapRange(bs1, bs2 *Bitstring, start, length uint) {
 	bs2.mustExist(start + length - 1)
 
 	// swap the required bits of the first word
-	i := start / uintsize
-	start = uint(bitoffset(start))
-	end := minuint(start+length, uintsize)
-	remain := length - (end - start)
-	swapBits(bs1, bs2, i, mask(start, end))
+	start64, len64 := uint64(start), uint64(length)
+	i := start64 / uintsize
+	start64 = bitoffset(start64)
+	end := minuint(start64+len64, uintsize)
+	remain := len64 - (end - start64)
+	swapBits(bs1, bs2, i, mask(start64, end))
 	i++
 
 	// swap whole words but the last one
@@ -212,7 +213,7 @@ func SwapRange(bs1, bs2 *Bitstring, start, length uint) {
 // swapBits swaps range of bits from one word to another.
 // w is the index of the word containing the bits to swap, and m is a mask that specifies
 // whilch bits of that word will be swapped.
-func swapBits(x, y *Bitstring, w, mask uint) {
+func swapBits(x, y *Bitstring, w, mask uint64) {
 	keep := ^mask
 	xkeep, ykeep := x.data[w]&keep, y.data[w]&keep
 	xswap, yswap := x.data[w]&mask, y.data[w]&mask
@@ -234,8 +235,11 @@ func (bs *Bitstring) String() string {
 }
 
 // Copy creates and returns a new Bitstring that is a copy of src.
+//
+// TODO: rename Clone and make Copy a free functions like copy builtin
+// (bitstring.Copy(dst, src)) with fewer allocation possible (possibly 0).
 func Copy(src *Bitstring) *Bitstring {
-	dst := make([]uint, len(src.data))
+	dst := make([]uint64, len(src.data))
 	copy(dst, src.data)
 	return &Bitstring{
 		length: src.length,

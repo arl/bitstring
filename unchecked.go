@@ -1,6 +1,6 @@
-// +build !dev
+// +build unchecked
 
 package bitstring
 
-// mustExist is a no-op in dev mode.
+// mustExist does nothing in unchecked mode
 func (bs *Bitstring) mustExist(i uint) {}

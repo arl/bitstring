@@ -1,37 +1,35 @@
 package bitstring
 
 // bitmask returns a mask where only the nth bit of a uint is set.
-func bitmask(n uint) uint { return 1 << n }
+func bitmask(n uint64) uint64 { return 1 << n }
 
 // wordoffset returns, for a given bit n of a bit string, the offset
 // of the uint that contains bit n.
-func wordoffset(n uint) uint { return uint(n / uintsize) }
+func wordoffset(n uint64) uint64 { return n / 64 }
 
 // bitoffset returns, for a given bit n of a bit string, the offset of
 // that bit with regards to the first bit of the uint that contains it.
-func bitoffset(n uint) uint { return uint(n & (uintsize - 1)) }
+func bitoffset(n uint64) uint64 { return n & (64 - 1) }
 
 // mask returns a mask that keeps the bits in the range [l, h) behaviour
 // undefined if any argument is greater than the size of a machine word.
-func mask(l, h uint) uint { return lomask(h) & himask(l) }
+func mask(l, h uint64) uint64 { return lomask(h) & himask(l) }
 
 // lomask returns a mask to keep the n LSB (least significant bits). Undefined
 // behaviour if n is greater than uintsize.
-func lomask(n uint) uint { return maxuint >> (uintsize - n) }
+func lomask(n uint64) uint64 { return maxuint >> (64 - n) }
 
 // himask returns a mask to keep the n MSB (most significant bits). Undefined
 // behaviour if n is greater than uintsize.
-func himask(n uint) uint { return maxuint << n }
+func himask(n uint64) uint64 { return maxuint << n }
 
 // findFirstSetBit returns the offset of the first set bit in w
-func findFirstSetBit(w uint) uint {
-	var num uint
+func findFirstSetBit(w uint64) uint64 {
+	var num uint64
 
-	if uintsize == 64 {
-		if (w & 0xffffffff) == 0 {
-			num += 32
-			w >>= 32
-		}
+	if (w & 0xffffffff) == 0 {
+		num += 32
+		w >>= 32
 	}
 	if (w & 0xffff) == 0 {
 		num += 16
@@ -57,6 +55,6 @@ func findFirstSetBit(w uint) uint {
 
 // transferbits returns the uint that results from transfering some bits from
 // src to dst, where set bits in mask specify the bits to transfer.
-func transferbits(dst, src, mask uint) uint {
+func transferbits(dst, src, mask uint64) uint64 {
 	return dst&^mask | src&mask
 }

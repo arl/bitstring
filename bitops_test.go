@@ -6,18 +6,18 @@ import (
 	"testing"
 )
 
-func atobin(s string) uint {
+func atobin(s string) uint64 {
 	i, err := strconv.ParseUint(s, 2, uintsize)
 	if err != nil {
 		panic(fmt.Sprintf("Can't convert %s to base 2: %s", s, err))
 	}
-	return uint(i)
+	return i
 }
 
 func Test_lomask(t *testing.T) {
 	tests := []struct {
-		n    uint
-		want uint
+		n    uint64
+		want uint64
 	}{
 		{n: 0, want: atobin("00000000000000000000000000000000")},
 		{n: 1, want: atobin("00000000000000000000000000000001")},
@@ -36,8 +36,8 @@ func Test_lomask(t *testing.T) {
 
 func Test_himask(t *testing.T) {
 	tests := []struct {
-		n    uint
-		want uint
+		n    uint64
+		want uint64
 	}{
 		{n: 0, want: maxuint},
 		{n: 1, want: maxuint - 1},
@@ -54,8 +54,8 @@ func Test_himask(t *testing.T) {
 
 func Test_genmask(t *testing.T) {
 	tests := []struct {
-		l, h uint
-		want uint
+		l, h uint64
+		want uint64
 	}{
 		{l: 0, h: 0, want: atobin("00000000000000000000000000000000")},
 		{l: 0, h: 1, want: atobin("00000000000000000000000000000001")},
@@ -76,8 +76,8 @@ func Test_genmask(t *testing.T) {
 
 func Test_findFirstSetBit(t *testing.T) {
 	tests := []struct {
-		w    uint
-		want uint
+		w    uint64
+		want uint64
 	}{
 		{w: atobin("00000000000000000000000000000001"), want: 0},
 		{w: atobin("00000000000000000000000000000010"), want: 1},

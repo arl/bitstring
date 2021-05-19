@@ -1,4 +1,4 @@
-// +build dev
+// +build !unchecked
 
 package bitstring
 

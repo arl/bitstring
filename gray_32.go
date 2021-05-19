@@ -1,6 +1,6 @@
-// +build 386 arm nacl mips mipsle
-
 package bitstring
+
+/*
 
 // Grayn returns the n-bit unsigned integer value represented by the n
 // gray-coded bits starting at the bit index i. It panics if there are not
@@ -14,3 +14,4 @@ func (bs *Bitstring) Grayn(nbits, i uint) uint {
 	v ^= v >> 1
 	return v
 }
+*/

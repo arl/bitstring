@@ -1,6 +1,6 @@
-// +build 386 arm nacl mips mipsle
-
 package bitstring
+
+/*
 
 // Uint32 returns the uint32 value represented by the 32 bits starting at the
 // given bit. It panics if there are not enough bits.
@@ -37,7 +37,7 @@ func (bs *Bitstring) SetUint32(i uint, x uint32) {
 
 	// fast path: i is a multiple of 32
 	if i&((1<<5)-1) == 0 {
-		bs.data[i>>5] = x
+		bs.data[i>>5] = uint(x)
 		return
 	}
 
@@ -62,3 +62,4 @@ func (bs *Bitstring) SetUint64(i uint, x uint64) {
 	bs.SetUint32(i, uint32(x))
 	bs.SetUint32(i+32, uint32(x>>32))
 }
+*/

@@ -10,7 +10,7 @@ var sink interface{}
 func benchmarkUintn(b *testing.B, nbits, i uint) {
 	b.ReportAllocs()
 	bs, _ := MakeFromString("0000000000000000000000000000000101000000000000000000000000000000")
-	var v uint
+	var v uint64
 	for n := 0; n < b.N; n++ {
 		v = bs.Uintn(nbits, i)
 	}
@@ -76,7 +76,7 @@ func BenchmarkUint8DifferentWords(b *testing.B)  { benchmarkUint8(b, 31) }
 func Benchmark_mask(b *testing.B) {
 	b.ReportAllocs()
 
-	var v uint
+	var v uint64
 	for i := 0; i < b.N; i++ {
 		v = mask(4, 27)
 	}
@@ -87,7 +87,7 @@ func Benchmark_mask(b *testing.B) {
 func Benchmark_lomask(b *testing.B) {
 	b.ReportAllocs()
 
-	var v uint
+	var v uint64
 	for i := 0; i < b.N; i++ {
 		v = lomask(27)
 	}
@@ -149,7 +149,7 @@ func BenchmarkSetUintn(b *testing.B) {
 	b.ResetTimer()
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		bs.SetUintn(64, 35, 0x9cfbeb71ee3fcf5f)
+		bs.SetUintn(64, 35, 0x9cfbeb71ee3fcf5f&uintsize)
 	}
 	b.StopTimer()
 	sink = bs

@@ -8,23 +8,24 @@ import (
 // starting at the bit index i. It panics if there aren't enough bits in bs or
 // if n is greater than the size of a machine word.
 // TODO: reverse order of nbits and i params
-func (bs *Bitstring) Uintn(n, i uint) uint {
+func (bs *Bitstring) Uintn(n, i uint) uint64 {
 	if n > uintsize || n < 1 {
 		panic(fmt.Sprintf("Uintn supports unsigned integers from 1 to %d bits long", uintsize))
 	}
 	bs.mustExist(i + n - 1)
 
-	j := wordoffset(i)
-	k := wordoffset(i + n - 1)
-	looff := bitoffset(i)
+	i64, n64 := uint64(i), uint64(n)
+	j := wordoffset(i64)
+	k := wordoffset(i64 + n64 - 1)
+	looff := bitoffset(i64)
 	loword := bs.data[j]
 	if j == k {
 		// fast path: same word
-		return (loword >> looff) & lomask(n)
+		return (loword >> looff) & lomask(n64)
 	}
-	hioff := bitoffset(i + n)
-	hiword := bs.data[k] & lomask(uint(hioff))
-	loword = himask(uint(looff)) & loword >> looff
+	hioff := bitoffset(i64 + n64)
+	hiword := bs.data[k] & lomask(hioff)
+	loword = himask(looff) & loword >> looff
 	return loword | hiword<<(uintsize-looff)
 }
 
@@ -33,9 +34,10 @@ func (bs *Bitstring) Uintn(n, i uint) uint {
 func (bs *Bitstring) Uint16(i uint) uint16 {
 	bs.mustExist(i + 15)
 
-	off := bitoffset(i)
-	loword := bs.data[wordoffset(i)] >> off
-	hiword := bs.data[wordoffset(i+15)] & ((1 << off) - 1)
+	i64 := uint64(i)
+	off := bitoffset(i64)
+	loword := bs.data[wordoffset(i64)] >> off
+	hiword := bs.data[wordoffset(i64+15)] & ((1 << off) - 1)
 	return uint16(loword | hiword<<(uintsize-off))
 }
 
@@ -44,9 +46,10 @@ func (bs *Bitstring) Uint16(i uint) uint16 {
 func (bs *Bitstring) Uint8(i uint) uint8 {
 	bs.mustExist(i + 7)
 
-	off := bitoffset(i)
-	loword := bs.data[wordoffset(i)] >> off
-	hiword := bs.data[wordoffset(i+7)] & ((1 << off) - 1)
+	i64 := uint64(i)
+	off := bitoffset(i64)
+	loword := bs.data[wordoffset(i64)] >> off
+	hiword := bs.data[wordoffset(i64+7)] & ((1 << off) - 1)
 	return uint8(loword | hiword<<(uintsize-off))
 }
 
@@ -74,19 +77,20 @@ func (bs *Bitstring) Int8(i uint) int8 { return int8(bs.Uint8(i)) }
 // SetUintn sets the n bits starting at i with the first n bits of value x.
 // It panics if there aren't enough bits in bs or if n is greater than
 // the size of a machine word.
-func (bs *Bitstring) SetUintn(n, i uint, x uint) {
+func (bs *Bitstring) SetUintn(n, i uint, x uint64) {
 	if n > uintsize || n < 1 {
 		panic(fmt.Sprintf("SetUintn supports unsigned integers from 1 to %d bits long", uintsize))
 	}
 	bs.mustExist(i + n - 1)
 
-	lobit := uint(bitoffset(i))
-	j := wordoffset(i)
-	k := wordoffset(i + n - 1)
+	i64, n64 := uint64(i), uint64(n)
+	lobit := bitoffset(i64)
+	j := wordoffset(i64)
+	k := wordoffset(i64 + n64 - 1)
 	if j == k {
 		// fast path: same word
-		x := (x & lomask(n)) << lobit
-		bs.data[j] = transferbits(bs.data[j], x, mask(lobit, lobit+n))
+		x := (x & lomask(n64)) << lobit
+		bs.data[j] = transferbits(bs.data[j], x, mask(lobit, lobit+n64))
 		return
 	}
 	// slow path: first and last bits are on different words
@@ -95,7 +99,7 @@ func (bs *Bitstring) SetUintn(n, i uint, x uint) {
 	bs.data[j] = transferbits(bs.data[j], x<<lobit, himask(lon))
 
 	// transfer bits to high word
-	bs.data[k] = transferbits(bs.data[k], x>>lon, lomask(n-lon))
+	bs.data[k] = transferbits(bs.data[k], x>>lon, lomask(n64-lon))
 }
 
 // SetUint8 sets the 8 bits starting at i with the value of x. It panics if
@@ -103,21 +107,22 @@ func (bs *Bitstring) SetUintn(n, i uint, x uint) {
 func (bs *Bitstring) SetUint8(i uint, x uint8) {
 	bs.mustExist(i + 7)
 
-	lobit := bitoffset(i)
-	j := wordoffset(i)
-	k := wordoffset(i + 7)
+	i64 := uint64(i)
+	lobit := bitoffset(i64)
+	j := wordoffset(i64)
+	k := wordoffset(i64 + 7)
 	if j == k {
 		// fast path: same word
-		neww := uint(x) << lobit
+		neww := uint64(x) << lobit
 		msk := mask(lobit, lobit+8)
 		bs.data[j] = transferbits(bs.data[j], neww, msk)
 		return
 	}
 	// transfer bits to low word
-	bs.data[j] = transferbits(bs.data[j], uint(x)<<lobit, himask(lobit))
+	bs.data[j] = transferbits(bs.data[j], uint64(x)<<lobit, himask(lobit))
 	// transfer bits to high word
 	lon := uintsize - lobit
-	bs.data[k] = transferbits(bs.data[k], uint(x)>>lon, lomask(8-lon))
+	bs.data[k] = transferbits(bs.data[k], uint64(x)>>lon, lomask(8-lon))
 }
 
 // SetUint16 sets the 16 bits starting at i with the value of x. It panics if
@@ -125,27 +130,27 @@ func (bs *Bitstring) SetUint8(i uint, x uint8) {
 func (bs *Bitstring) SetUint16(i uint, x uint16) {
 	bs.mustExist(i + 15)
 
-	lobit := uint(bitoffset(i))
-	j := wordoffset(i)
-	k := wordoffset(i + 15)
+	i64 := uint64(i)
+	lobit := bitoffset(i64)
+	j := wordoffset(i64)
+	k := wordoffset(i64 + 15)
 	if j == k {
 		// fast path: same word
-		neww := uint(x) << lobit
+		neww := uint64(x) << lobit
 		msk := mask(lobit, lobit+16)
 		bs.data[j] = transferbits(bs.data[j], neww, msk)
 		return
 	}
 	// transfer bits to low word
-	bs.data[j] = transferbits(bs.data[j], uint(x)<<lobit, himask(lobit))
+	bs.data[j] = transferbits(bs.data[j], uint64(x)<<lobit, himask(lobit))
 	// transfer bits to high word
 	lon := uintsize - lobit
-	bs.data[k] = transferbits(bs.data[k], uint(x)>>lon, lomask(16-lon))
+	bs.data[k] = transferbits(bs.data[k], uint64(x)>>lon, lomask(16-lon))
 }
 
-// SetIntn sets the n bits starting at i with the first n bits of value x.
-// It panics if there aren't enough bits in bs or if n is greater than
-// the size of a machine word.
-func (bs *Bitstring) SetIntn(n, i uint, x uint) { bs.SetUintn(n, i, x) }
+// SetIntn sets the n bits starting at i with the first n bits of value x. It
+// panics if there aren't enough bits in bs or if n is greater than 64.
+func (bs *Bitstring) SetIntn(n, i uint, x int64) { bs.SetUintn(n, i, uint64(x)) }
 
 // SetInt8 sets the 8 bits starting at i with the value of x. It panics if
 // there are not enough bits.

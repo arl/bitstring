@@ -13,7 +13,7 @@ func TestBitstringUintn(t *testing.T) {
 	tests := []struct {
 		input    string
 		nbits, i uint
-		want     uint
+		want     uint64
 	}{
 		// LSB and MSB are both on the same word
 		{input: "10", nbits: 1, i: 0, want: 0},
@@ -97,7 +97,7 @@ func TestBitstringUint64(t *testing.T) {
 			got := bs.Uint64(tt.i)
 			if tt.want != got {
 				t.Errorf("Bitstring(%s).Uint64(%d) got %s, want %s", tt.input, tt.i,
-					sprintubits(uint(got), 64), sprintubits(uint(tt.want), 64))
+					sprintubits(got, 64), sprintubits(tt.want, 64))
 			}
 		})
 	}
@@ -156,7 +156,7 @@ func TestBitstringUint32(t *testing.T) {
 			got := bs.Uint32(tt.i)
 			if tt.want != got {
 				t.Errorf("Bitstring(%s).Uint32(%d) got %s, want %s", tt.input, tt.i,
-					sprintubits(uint(got), 32), sprintubits(uint(tt.want), 32))
+					sprintubits(uint64(got), 32), sprintubits(uint64(tt.want), 32))
 			}
 		})
 	}
@@ -215,7 +215,7 @@ func TestBitstringUint16(t *testing.T) {
 			got := bs.Uint16(tt.i)
 			if tt.want != got {
 				t.Errorf("Bitstring(%s).Uint16(%d) got %s, want %s", tt.input, tt.i,
-					sprintubits(uint(got), 16), sprintubits(uint(tt.want), 16))
+					sprintubits(uint64(got), 16), sprintubits(uint64(tt.want), 16))
 			}
 		})
 	}
@@ -274,7 +274,7 @@ func TestBitstringUint8(t *testing.T) {
 			got := bs.Uint8(tt.i)
 			if tt.want != got {
 				t.Errorf("Bitstring(%s).Uint8(%d) got %s, want %s", tt.input, tt.i,
-					sprintubits(uint(got), 8), sprintubits(uint(tt.want), 8))
+					sprintubits(uint64(got), 8), sprintubits(uint64(tt.want), 8))
 			}
 		})
 	}
@@ -323,7 +323,7 @@ func TestBitstringInt32(t *testing.T) {
 			got := bs.Int32(tt.i)
 			if tt.want != got {
 				t.Errorf("Bitstring(%s).Int32(%d) got %s, want %s", tt.input, tt.i,
-					sprintsbits(int(got), 32), sprintsbits(int(tt.want), 32))
+					sprintsbits(int64(got), 32), sprintsbits(int64(tt.want), 32))
 			}
 		})
 	}
@@ -369,7 +369,7 @@ func TestBitstringInt16(t *testing.T) {
 			got := bs.Int16(tt.i)
 			if tt.want != got {
 				t.Errorf("Bitstring(%s).Int16(%d) got %s, want %s", tt.input, tt.i,
-					sprintsbits(int(got), 16), sprintsbits(int(tt.want), 16))
+					sprintsbits(int64(got), 16), sprintsbits(int64(tt.want), 16))
 			}
 		})
 	}
@@ -415,7 +415,7 @@ func TestBitstringInt8(t *testing.T) {
 			got := bs.Int8(tt.i)
 			if tt.want != got {
 				t.Errorf("Bitstring(%s).Int8(%d) got %s, want %s", tt.input, tt.i,
-					sprintsbits(int(got), 8), sprintsbits(int(tt.want), 8))
+					sprintsbits(int64(got), 8), sprintsbits(int64(tt.want), 8))
 			}
 		})
 	}
@@ -428,7 +428,7 @@ func TestBitstringInt8(t *testing.T) {
 func TestBitstringSetUintn(t *testing.T) {
 	tests := []struct {
 		bs       string // starting bitstring
-		x        uint   // value to set
+		x        uint64 // value to set
 		nbits, i uint
 		want     string
 	}{
