@@ -232,6 +232,23 @@ func Clone(src *Bitstring) *Bitstring {
 	}
 }
 
+// Copy copies a source Bitstring into a destination Bitstring, shrinking or
+// expanding it if necessary.
+func Copy(dst, src *Bitstring) {
+	switch {
+	case dst.length == src.length:
+	case dst.length < src.length:
+		// XXX: Reallocate the whole bitstring, but is it really faster?
+		dst.data = make([]uint64, len(src.data))
+		dst.length = src.length
+	case dst.length > src.length:
+		dst.data = dst.data[:len(src.data)]
+		dst.length = src.length
+	}
+
+	copy(dst.data, src.data)
+}
+
 // Equals returns true if bs and other have the same lenght and each bit are
 // identical, or if bs and other both point to the same Bitstring instance
 // (i.e pointer equality).

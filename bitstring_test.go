@@ -118,6 +118,15 @@ func TestZeroesCount(t *testing.T) {
 	assert.EqualValuesf(t, 7, setBits, "want set bits = 7, got: %v", setBits)
 }
 
+func equalbits(tb testing.TB, got, want *Bitstring) {
+	tb.Helper()
+
+	assert.Equalf(tb, want.length, got.length, "bitstrings don't have same length")
+
+	for i := 0; i < got.Len(); i++ {
+		assert.Equalf(tb, want.Bit(i), got.Bit(i), "bitstrings differs original at bit %d (at least)", i)
+	}
+}
 func TestClone(t *testing.T) {
 	rng := rand.New(rand.NewSource(99))
 	bs := Random(2000, rng)
@@ -126,14 +135,42 @@ func TestClone(t *testing.T) {
 	bs.SetBit(8)
 	cpy := Clone(bs)
 
-	// Check the copy is a bit-for-bit duplicate.
-	for i := 0; i < bs.Len(); i++ {
-		assert.Equalf(t, bs.Bit(i), cpy.Bit(i), "copy differs original at bit %d", i)
-	}
+	equalbits(t, cpy, bs)
 
 	assert.False(t, cpy == bs, "copy and original should be different bitstring instances")
-	bs.FlipBit(2)
-	assert.False(t, cpy.Bit(2) == bs.Bit(2), "copy and original are not independent from each other")
+}
+
+func TestCopy(t *testing.T) {
+	rng := rand.New(rand.NewSource(99))
+	bs := Random(2000, rng)
+	bs.SetBit(3)
+	bs.SetBit(7)
+	bs.SetBit(1898)
+
+	// zero-value destination
+	var cpy Bitstring
+	Copy(&cpy, bs)
+
+	equalbits(t, bs, &cpy)
+	assert.False(t, &cpy == bs, "copy and original should be different bitstring instances")
+
+	// smaller destination
+	cpy2 := New(1)
+	Copy(cpy2, bs)
+	equalbits(t, bs, cpy2)
+	assert.False(t, cpy2 == bs, "copy and original should be different bitstring instances")
+
+	// same size destination
+	cpy3 := New(2000)
+	Copy(cpy3, bs)
+	equalbits(t, bs, cpy3)
+	assert.False(t, cpy3 == bs, "copy and original should be different bitstring instances")
+
+	// larger destination
+	cpy4 := New(3000)
+	Copy(cpy4, bs)
+	equalbits(t, bs, cpy4)
+	assert.False(t, cpy4 == bs, "copy and original should be different bitstring instances")
 }
 
 func TestEquality(t *testing.T) {
