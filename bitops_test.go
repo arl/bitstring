@@ -1,18 +1,8 @@
 package bitstring
 
 import (
-	"fmt"
-	"strconv"
 	"testing"
 )
-
-func atobin(s string) uint64 {
-	i, err := strconv.ParseUint(s, 2, uintsize)
-	if err != nil {
-		panic(fmt.Sprintf("Can't convert %s to base 2: %s", s, err))
-	}
-	return i
-}
 
 func Test_lomask(t *testing.T) {
 	tests := []struct {
@@ -89,7 +79,7 @@ func Test_findFirstSetBit(t *testing.T) {
 		{w: atobin("11111111111111111111111111111111"), want: 0},
 	}
 	for _, tt := range tests {
-		if got := findFirstSetBit(tt.w); got != tt.want {
+		if got := firstSetBit(tt.w); got != tt.want {
 			t.Errorf("findFirstSetBit(%s) got %d, want %d",
 				sprintubits(tt.w, 32), got, tt.want)
 		}

@@ -23,8 +23,8 @@ func lomask(n uint64) uint64 { return maxuint >> (64 - n) }
 // behaviour if n is greater than uintsize.
 func himask(n uint64) uint64 { return maxuint << n }
 
-// findFirstSetBit returns the offset of the first set bit in w
-func findFirstSetBit(w uint64) uint64 {
+// firstSetBit returns the offset of the first set bit in w
+func firstSetBit(w uint64) uint64 {
 	var num uint64
 
 	if (w & 0xffffffff) == 0 {

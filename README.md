@@ -4,4 +4,7 @@
 [![codecov](https://codecov.io/gh/arl/bitstring/branch/master/graph/badge.svg)](https://codecov.io/gh/arl/bitstring)
 
 # bitstring
-Go Bitstring library
+Go bitstring library
+
+Package `bitstring` implements an fixed-length bit string type and many bit
+string manipulation functions.

@@ -2,6 +2,7 @@ package bitstring
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 )
 
@@ -19,6 +20,14 @@ func sprintsbits(val int64, nbits int) string {
 		return sprintubits(uint64(val), nbits)
 	}
 	return fmt.Sprintf(fmt.Sprintf("%%0%db", nbits), val)
+}
+
+func atobin(s string) uint64 {
+	i, err := strconv.ParseUint(s, 2, uintsize)
+	if err != nil {
+		panic(fmt.Sprintf("Can't convert %s to base 2: %s", s, err))
+	}
+	return i
 }
 
 // prints a string representing the first n bits of the base-2 representation of val.
