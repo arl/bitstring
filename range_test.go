@@ -126,8 +126,13 @@ func TestSwapRange(t *testing.T) {
 			assert.NoError(t, err2)
 			SwapRange(x, y, tt.start, tt.length)
 
-			assert.Equal(t, tt.wantx, x.String())
-			assert.Equal(t, tt.wanty, y.String())
+			wantx, err := MakeFromString(tt.wantx)
+			assert.NoError(t, err)
+			wanty, err := MakeFromString(tt.wanty)
+			assert.NoError(t, err)
+
+			equalbits(t, x, wantx)
+			equalbits(t, y, wanty)
 		})
 	}
 }
@@ -215,7 +220,10 @@ func TestSetRange(t *testing.T) {
 			assert.NoError(t, err1)
 			x.SetRange(tt.start, tt.length)
 
-			assert.Equal(t, tt.want, x.String())
+			want, err := MakeFromString(tt.want)
+			assert.NoError(t, err)
+
+			equalbits(t, x, want)
 		})
 	}
 }
@@ -299,11 +307,105 @@ func TestClearRange(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			x, err1 := MakeFromString(tt.x)
-			assert.NoError(t, err1)
+			x, err := MakeFromString(tt.x)
+			assert.NoError(t, err)
 			x.ClearRange(tt.start, tt.length)
 
-			assert.Equal(t, tt.want, x.String())
+			want, err := MakeFromString(tt.want)
+			assert.NoError(t, err)
+
+			equalbits(t, x, want)
+		})
+	}
+}
+
+func TestFlipRange(t *testing.T) {
+	tests := []struct {
+		x             string
+		start, length int
+		want          string
+	}{
+		{
+			start: 0, length: 1,
+			x:    "1",
+			want: "0",
+		},
+		{
+			start: 0, length: 1,
+			x:    "0",
+			want: "1",
+		},
+		{
+			start: 0, length: 32,
+			x:    "1111111111111111111111111111111100000000000000000000000000000000",
+			want: "1111111111111111111111111111111111111111111111111111111111111111",
+		},
+		{
+			start: 2, length: 30,
+			x:    "1111111100000000000000000000000000000011",
+			want: "1111111111111111111111111111111111111111",
+		},
+		{
+			start: 0, length: 3,
+			x:    "1111111000",
+			want: "1111111111",
+		},
+		{
+			start: 1, length: 2,
+			x:    "001",
+			want: "111",
+		},
+		{
+			start: 0, length: 3,
+			x:    "111",
+			want: "000",
+		},
+		{
+			start: 0, length: 63,
+			x:    "111111111111111111111111111111111111111111111111111111111111111",
+			want: "000000000000000000000000000000000000000000000000000000000000000",
+		},
+		{
+			start: 0, length: 64,
+			x:    "1111111111111111111111111111111111111111111111111111111111111111",
+			want: "0000000000000000000000000000000000000000000000000000000000000000",
+		},
+		{
+			start: 1, length: 64,
+			x:    "111111111111111111111111111111111111111111111111111111111111111111",
+			want: "100000000000000000000000000000000000000000000000000000000000000001",
+		},
+		{
+			start: 94, length: 1,
+			x:    "1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			want: "1101111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+		},
+		{
+			start: 1, length: 256,
+			x:    "111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			want: "100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001",
+		},
+		{
+			start: 64, length: 2,
+			x:    "1111111111111111111111111111111111111111111111111111111111111111111",
+			want: "1001111111111111111111111111111111111111111111111111111111111111111",
+		},
+		{
+			start: 65, length: 1,
+			x:    "1111111111111111111111111111111111111111111111111111111111111111111",
+			want: "1011111111111111111111111111111111111111111111111111111111111111111",
+		},
+	}
+	for _, tt := range tests {
+		t.Run("", func(t *testing.T) {
+			x, err1 := MakeFromString(tt.x)
+			assert.NoError(t, err1)
+			x.FlipRange(tt.start, tt.length)
+
+			want, err := MakeFromString(tt.want)
+			assert.NoError(t, err)
+
+			equalbits(t, x, want)
 		})
 	}
 }

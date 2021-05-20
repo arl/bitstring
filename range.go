@@ -105,3 +105,32 @@ func (bs *Bitstring) ClearRange(start, length int) {
 		bs.data[i] &= himask(remain)
 	}
 }
+
+// FlipRange flips a range of bits (flips the value of every bit).
+//
+// The range [start, start+length) must exist or FlipRange has undefined
+// behavior.
+func (bs *Bitstring) FlipRange(start, length int) {
+	bs.mustExist(start + length - 1)
+
+	// Flips the required bits of the first word.
+	start64, len64 := uint64(start), uint64(length)
+	i := wordoffset(start64)
+	start64 = bitoffset(start64)
+	end := minuint(start64+len64, uintsize)
+	remain := len64 - (end - start64)
+	bs.data[i] ^= mask(start64, end)
+	i++
+
+	// Flips all bits in remaining words but the last one.
+	for remain > uintsize {
+		bs.data[i] ^= maxuint
+		remain -= uintsize
+		i++
+	}
+
+	// Flip bits in the last word.
+	if remain != 0 {
+		bs.data[i] ^= lomask(remain)
+	}
+}
