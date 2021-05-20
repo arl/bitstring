@@ -39,4 +39,12 @@ func equalbits(tb testing.TB, got, want *Bitstring) {
 			tb.Fatalf("bitstrings differs from expected from bit %d (bit %d of word %d)", i, bitoffset(uint64(i)), wordoffset(uint64(i)))
 		}
 	}
+
+	// Even if all useful bits are equal we want the extra bits to be the same
+	// (0's) of that could mess up with functions such as OnesCount, etc.
+	for i := range want.data {
+		if want.data[i] != got.data[i] {
+			tb.Fatalf("differences in extra bits i=%d got=0v%b want=0b%b", i, got.data[i], want.data[i])
+		}
+	}
 }
