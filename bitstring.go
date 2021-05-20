@@ -154,54 +154,6 @@ func (bs *Bitstring) BigInt() *big.Int {
 	return bi
 }
 
-func minuint(x, y uint64) uint64 {
-	if x < y {
-		return x
-	}
-	return y
-}
-
-// SwapRange swaps the same range of bits between bs and other.
-//
-// Both Bitstring may have different length the bit with index start+lenght must
-// be valid on both or SwapRange will panic.
-func SwapRange(bs1, bs2 *Bitstring, start, length int) {
-	bs1.mustExist(start + length - 1)
-	bs2.mustExist(start + length - 1)
-
-	// swap the required bits of the first word
-	start64, len64 := uint64(start), uint64(length)
-	i := start64 / uintsize
-	start64 = bitoffset(start64)
-	end := minuint(start64+len64, uintsize)
-	remain := len64 - (end - start64)
-	swapBits(bs1, bs2, i, mask(start64, end))
-	i++
-
-	// swap whole words but the last one
-	for remain > uintsize {
-		bs1.data[i], bs2.data[i] = bs2.data[i], bs1.data[i]
-		remain -= uintsize
-		i++
-	}
-
-	// swap the remaining bits of the last word
-	if remain != 0 {
-		swapBits(bs1, bs2, i, lomask(remain))
-	}
-}
-
-// swapBits swaps range of bits from one word to another.
-// w is the index of the word containing the bits to swap, and m is a mask that specifies
-// whilch bits of that word will be swapped.
-func swapBits(x, y *Bitstring, w, mask uint64) {
-	keep := ^mask
-	xkeep, ykeep := x.data[w]&keep, y.data[w]&keep
-	xswap, yswap := x.data[w]&mask, y.data[w]&mask
-	x.data[w] = xkeep | yswap
-	y.data[w] = ykeep | xswap
-}
-
 // String returns a string representation of bs in big endian order.
 func (bs *Bitstring) String() string {
 	b := make([]byte, bs.length)
@@ -215,7 +167,7 @@ func (bs *Bitstring) String() string {
 	return string(b)
 }
 
-// Clone creates and returns a new Bitstring that is a copy of src.
+// Clone creates and returns a new Bitstring that is a clone of src.
 func Clone(src *Bitstring) *Bitstring {
 	dst := make([]uint64, len(src.data))
 	copy(dst, src.data)
