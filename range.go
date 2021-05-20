@@ -55,7 +55,7 @@ func swapBits(x, y *Bitstring, w, mask uint64) {
 func (bs *Bitstring) SetRange(start, length int) {
 	bs.mustExist(start + length - 1)
 
-	// Swap the required bits of the first word.
+	// Sets the required bits of the first word.
 	start64, len64 := uint64(start), uint64(length)
 	i := wordoffset(start64)
 	start64 = bitoffset(start64)
@@ -74,5 +74,34 @@ func (bs *Bitstring) SetRange(start, length int) {
 	// Set bits in the last word.
 	if remain != 0 {
 		bs.data[i] |= lomask(remain)
+	}
+}
+
+// ClearRange clears a range of bits (sets all bits to 0).
+//
+// The range [start, start+length) must exist or ClearRange has undefined
+// behavior.
+func (bs *Bitstring) ClearRange(start, length int) {
+	bs.mustExist(start + length - 1)
+
+	// Clears the required bits of the first word.
+	start64, len64 := uint64(start), uint64(length)
+	i := wordoffset(start64)
+	start64 = bitoffset(start64)
+	end := minuint(start64+len64, uintsize)
+	remain := len64 - (end - start64)
+	bs.data[i] &= ^mask(start64, end)
+	i++
+
+	// Clears all bits in remaining words but the last one.
+	for remain > uintsize {
+		bs.data[i] = 0
+		remain -= uintsize
+		i++
+	}
+
+	// Clear bits in the last word.
+	if remain != 0 {
+		bs.data[i] &= himask(remain)
 	}
 }
