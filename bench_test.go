@@ -179,7 +179,6 @@ func benchmarkOnesCount(b *testing.B, val string) {
 	sink = ones
 }
 
-
 // 	var ones uint
 // 	b.ResetTimer()
 // 	b.ReportAllocs()
