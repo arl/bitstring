@@ -76,7 +76,7 @@ func NewFromString(s string) (*Bitstring, error) {
 	return bs, nil
 }
 
-// Len returns the lenght if bs, that is the number of bits it contains.
+// Len returns the length if bs, that is the number of bits it contains.
 func (bs *Bitstring) Len() int {
 	return int(bs.length)
 }
@@ -194,9 +194,9 @@ func Copy(dst, src *Bitstring) {
 	copy(dst.data, src.data)
 }
 
-// Equals returns true if bs and other have the same lenght and each bit are
-// identical, or if bs and other both point to the same Bitstring instance
-// (i.e pointer equality).
+// Equals returns true if bs and other have the same length and each bit are
+// identical, or if bs and other both point to the same Bitstring instance (i.e
+// pointer equality).
 func (bs *Bitstring) Equals(other *Bitstring) bool {
 	switch {
 	case bs == other:

@@ -53,7 +53,7 @@ func firstSetBit(w uint64) uint64 {
 	return num
 }
 
-// transferbits returns the uint that results from transfering some bits from
+// transferbits returns the uint that results from transferring some bits from
 // src to dst, where set bits in mask specify the bits to transfer.
 func transferbits(dst, src, mask uint64) uint64 {
 	return dst&^mask | src&mask
