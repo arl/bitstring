@@ -72,3 +72,27 @@ func ExampleSwapRange() {
 	fmt.Println(bs1)
 	// Output: 011
 }
+
+func ExampleBitstring_ClearRange() {
+	bs, _ := MakeFromString("10101010")
+	// Clear the 3 bits at offset 2.
+	bs.ClearRange(2, 3)
+	fmt.Println(bs)
+	// Output: 10100010
+}
+
+func ExampleBitstring_SetRange() {
+	bs, _ := MakeFromString("10101010")
+	// Set the 3 bits at offset 2.
+	bs.SetRange(2, 3)
+	fmt.Println(bs)
+	// Output: 10111110
+}
+
+func ExampleBitstring_FlipRange() {
+	bs, _ := MakeFromString("10101010")
+	// Flip the 3 bits at offset 2.
+	bs.FlipRange(2, 3)
+	fmt.Println(bs)
+	// Output: 10110110
+}
