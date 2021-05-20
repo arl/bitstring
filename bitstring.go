@@ -58,9 +58,9 @@ func Random(length int, rng *rand.Rand) *Bitstring {
 	return bs
 }
 
-// MakeFromString returns the corresponding Bitstring for the given string of 1s
+// NewFromString returns the corresponding Bitstring for the given string of 1s
 // and 0s in big endian order.
-func MakeFromString(s string) (*Bitstring, error) {
+func NewFromString(s string) (*Bitstring, error) {
 	bs := New(len(s))
 
 	for i, c := range s {
@@ -214,4 +214,29 @@ func (bs *Bitstring) Equals(other *Bitstring) bool {
 		return true
 	}
 	return false
+}
+
+// RotateLeft rotates the bitstring by (k mod len) bits.
+func (bs *Bitstring) RotateLeft(k int) {
+	panic("unimplemented")
+}
+
+// RotateRight rotates the bitstring by (k mod len) bits.
+func (bs *Bitstring) RotateRight(k int) {
+	panic("unimplemented")
+}
+
+// Reverse reverses the order of bits in the bitstring.
+func (bs *Bitstring) Reverse(k int) {
+	panic("unimplemented")
+}
+
+// LeadingZeros returns the number of leading zero bits in the bitstring.
+func (bs *Bitstring) LeadingZeros() int {
+	panic("unimplemented")
+}
+
+// TrailingZeros returns the number of trailing zero bits in the bitstring.
+func (bs *Bitstring) TrailingZeros() int {
+	panic("unimplemented")
 }

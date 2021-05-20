@@ -16,7 +16,7 @@ func TestGray8(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			bs, _ := MakeFromString(tt.input)
+			bs, _ := NewFromString(tt.input)
 			got := bs.Gray8(0)
 			if tt.want != got {
 				t.Errorf("Bitstring(%s).Gray8(0) got %s, want %s", tt.input,
@@ -37,7 +37,7 @@ func TestGray16(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			bs, _ := MakeFromString(tt.input)
+			bs, _ := NewFromString(tt.input)
 			got := bs.Gray16(0)
 			if tt.want != got {
 				t.Errorf("Bitstring(%s).Gray16(0) got %s, want %s", tt.input,
@@ -58,7 +58,7 @@ func TestGray32(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			bs, _ := MakeFromString(tt.input)
+			bs, _ := NewFromString(tt.input)
 			got := bs.Gray32(0)
 			if tt.want != got {
 				t.Errorf("Bitstring(%s).Gray32(0) got %s, want %s", tt.input,
@@ -79,7 +79,7 @@ func TestGray64(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			bs, _ := MakeFromString(tt.input)
+			bs, _ := NewFromString(tt.input)
 			got := bs.Gray64(0)
 			if tt.want != got {
 				t.Errorf("Bitstring(%s).Gray64(0) got %s, want %s", tt.input,
@@ -103,7 +103,7 @@ func TestGrayn(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			bs, _ := MakeFromString(tt.input)
+			bs, _ := NewFromString(tt.input)
 			got := bs.Grayn(tt.nbits, 0)
 			if tt.want != got {
 				t.Errorf("Bitstring(%s).Grayn(%d, 0) got %s, want %s", tt.input, tt.nbits,

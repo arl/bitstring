@@ -34,7 +34,7 @@ func TestUintn(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			bs, _ := MakeFromString(tt.input)
+			bs, _ := NewFromString(tt.input)
 			got := bs.Uintn(tt.nbits, tt.i)
 			if tt.want != got {
 				t.Errorf("Bitstring(%s).Uintn(%d, %d) got %s, want %s", tt.input, tt.nbits, tt.i,
@@ -93,7 +93,7 @@ func TestUint64(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			bs, _ := MakeFromString(tt.input)
+			bs, _ := NewFromString(tt.input)
 			got := bs.Uint64(tt.i)
 			if tt.want != got {
 				t.Errorf("Bitstring(%s).Uint64(%d) got %s, want %s", tt.input, tt.i,
@@ -152,7 +152,7 @@ func TestUint32(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			bs, _ := MakeFromString(tt.input)
+			bs, _ := NewFromString(tt.input)
 			got := bs.Uint32(tt.i)
 			if tt.want != got {
 				t.Errorf("Bitstring(%s).Uint32(%d) got %s, want %s", tt.input, tt.i,
@@ -211,7 +211,7 @@ func TestUint16(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			bs, _ := MakeFromString(tt.input)
+			bs, _ := NewFromString(tt.input)
 			got := bs.Uint16(tt.i)
 			if tt.want != got {
 				t.Errorf("Bitstring(%s).Uint16(%d) got %s, want %s", tt.input, tt.i,
@@ -270,7 +270,7 @@ func TestUint8(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			bs, _ := MakeFromString(tt.input)
+			bs, _ := NewFromString(tt.input)
 			got := bs.Uint8(tt.i)
 			if tt.want != got {
 				t.Errorf("Bitstring(%s).Uint8(%d) got %s, want %s", tt.input, tt.i,
@@ -319,7 +319,7 @@ func TestInt32(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			bs, _ := MakeFromString(tt.input)
+			bs, _ := NewFromString(tt.input)
 			got := bs.Int32(tt.i)
 			if tt.want != got {
 				t.Errorf("Bitstring(%s).Int32(%d) got %s, want %s", tt.input, tt.i,
@@ -365,7 +365,7 @@ func TestInt16(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			bs, _ := MakeFromString(tt.input)
+			bs, _ := NewFromString(tt.input)
 			got := bs.Int16(tt.i)
 			if tt.want != got {
 				t.Errorf("Bitstring(%s).Int16(%d) got %s, want %s", tt.input, tt.i,
@@ -411,7 +411,7 @@ func TestInt8(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			bs, _ := MakeFromString(tt.input)
+			bs, _ := NewFromString(tt.input)
 			got := bs.Int8(tt.i)
 			if tt.want != got {
 				t.Errorf("Bitstring(%s).Int8(%d) got %s, want %s", tt.input, tt.i,
@@ -488,9 +488,9 @@ func TestSetUintn(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			bs, _ := MakeFromString(tt.bs)
+			bs, _ := NewFromString(tt.bs)
 			bs.SetUintn(tt.nbits, tt.i, tt.x)
-			want, _ := MakeFromString(tt.want)
+			want, _ := NewFromString(tt.want)
 			if !want.Equals(bs) {
 				t.Errorf("Bitstring(%s).SetUintn(%d, %d, %d) got %s, want %s",
 					tt.bs, tt.nbits, tt.i, tt.x, bs, want)
@@ -557,9 +557,9 @@ func TestSetUint8(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			bs, _ := MakeFromString(tt.bs)
+			bs, _ := NewFromString(tt.bs)
 			bs.SetUint8(tt.i, tt.x)
-			want, _ := MakeFromString(tt.want)
+			want, _ := NewFromString(tt.want)
 			if !want.Equals(bs) {
 				t.Errorf("Bitstring(%s).SetUint8(%d, %d) got %s, want %s",
 					tt.bs, tt.i, tt.x, bs, want)
@@ -626,9 +626,9 @@ func TestSetUint16(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			bs, _ := MakeFromString(tt.bs)
+			bs, _ := NewFromString(tt.bs)
 			bs.SetUint16(tt.i, tt.x)
-			want, _ := MakeFromString(tt.want)
+			want, _ := NewFromString(tt.want)
 			if !want.Equals(bs) {
 				t.Errorf("Bitstring(%s).SetUint16(%d, %d) got %s, want %s",
 					tt.bs, tt.i, tt.x, bs, want)
@@ -695,9 +695,9 @@ func TestSetUint32(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			bs, _ := MakeFromString(tt.bs)
+			bs, _ := NewFromString(tt.bs)
 			bs.SetUint32(tt.i, tt.x)
-			want, _ := MakeFromString(tt.want)
+			want, _ := NewFromString(tt.want)
 			if !want.Equals(bs) {
 				t.Errorf("Bitstring(%s).SetUint32(%d, %d) got %s, want %s",
 					tt.bs, tt.i, tt.x, bs, want)
@@ -764,9 +764,9 @@ func TestSetUint64(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			bs, _ := MakeFromString(tt.bs)
+			bs, _ := NewFromString(tt.bs)
 			bs.SetUint64(tt.i, tt.x)
-			want, _ := MakeFromString(tt.want)
+			want, _ := NewFromString(tt.want)
 			if !want.Equals(bs) {
 				t.Errorf("Bitstring(%s).SetUint64(%d, %d) got %s, want %s",
 					tt.bs, tt.i, tt.x, bs, want)
@@ -777,7 +777,7 @@ func TestSetUint64(t *testing.T) {
 
 func TestSetInt(t *testing.T) {
 	t.Run("SetInt8", func(t *testing.T) {
-		bs, _ := MakeFromString("00000000")
+		bs, _ := NewFromString("00000000")
 		want := int8(math.MinInt8 / 3 * 2)
 		bs.SetInt8(0, want)
 		got := bs.Int8(0)
@@ -787,7 +787,7 @@ func TestSetInt(t *testing.T) {
 		}
 	})
 	t.Run("SetInt16", func(t *testing.T) {
-		bs, _ := MakeFromString("0000000000000000")
+		bs, _ := NewFromString("0000000000000000")
 		want := int16(math.MinInt16 / 3 * 2)
 		bs.SetInt16(0, want)
 		got := bs.Int16(0)
@@ -797,7 +797,7 @@ func TestSetInt(t *testing.T) {
 		}
 	})
 	t.Run("SetInt32", func(t *testing.T) {
-		bs, _ := MakeFromString("00000000000000000000000000000000")
+		bs, _ := NewFromString("00000000000000000000000000000000")
 		want := int32(math.MinInt32 / 3 * 2)
 		bs.SetInt32(0, want)
 		got := bs.Int32(0)
@@ -807,7 +807,7 @@ func TestSetInt(t *testing.T) {
 		}
 	})
 	t.Run("SetInt64", func(t *testing.T) {
-		bs, _ := MakeFromString("0000000000000000000000000000000000000000000000000000000000000000")
+		bs, _ := NewFromString("0000000000000000000000000000000000000000000000000000000000000000")
 		want := int64(math.MinInt64 / 3 * 2)
 		bs.SetInt64(0, want)
 		got := bs.Int64(0)

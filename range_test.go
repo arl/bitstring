@@ -120,15 +120,15 @@ func TestSwapRange(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			x, err1 := MakeFromString(tt.x)
+			x, err1 := NewFromString(tt.x)
 			assert.NoError(t, err1)
-			y, err2 := MakeFromString(tt.y)
+			y, err2 := NewFromString(tt.y)
 			assert.NoError(t, err2)
 			SwapRange(x, y, tt.start, tt.length)
 
-			wantx, err := MakeFromString(tt.wantx)
+			wantx, err := NewFromString(tt.wantx)
 			assert.NoError(t, err)
-			wanty, err := MakeFromString(tt.wanty)
+			wanty, err := NewFromString(tt.wanty)
 			assert.NoError(t, err)
 
 			equalbits(t, x, wantx)
@@ -216,11 +216,11 @@ func TestSetRange(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			x, err1 := MakeFromString(tt.x)
+			x, err1 := NewFromString(tt.x)
 			assert.NoError(t, err1)
 			x.SetRange(tt.start, tt.length)
 
-			want, err := MakeFromString(tt.want)
+			want, err := NewFromString(tt.want)
 			assert.NoError(t, err)
 
 			equalbits(t, x, want)
@@ -307,11 +307,11 @@ func TestClearRange(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			x, err := MakeFromString(tt.x)
+			x, err := NewFromString(tt.x)
 			assert.NoError(t, err)
 			x.ClearRange(tt.start, tt.length)
 
-			want, err := MakeFromString(tt.want)
+			want, err := NewFromString(tt.want)
 			assert.NoError(t, err)
 
 			equalbits(t, x, want)
@@ -398,11 +398,11 @@ func TestFlipRange(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			x, err1 := MakeFromString(tt.x)
+			x, err1 := NewFromString(tt.x)
 			assert.NoError(t, err1)
 			x.FlipRange(tt.start, tt.length)
 
-			want, err := MakeFromString(tt.want)
+			want, err := NewFromString(tt.want)
 			assert.NoError(t, err)
 
 			equalbits(t, x, want)

@@ -10,9 +10,9 @@ func ExampleNew() {
 	// Output: 00000000000000000000000000000000
 }
 
-func ExampleMakeFromString() {
+func ExampleNewFromString() {
 	// Create a Bitstring from a string made of 0's and 1's.
-	bs, _ := MakeFromString("101001")
+	bs, _ := NewFromString("101001")
 	fmt.Println(bs)
 	fmt.Println(bs.Len(), "bits")
 	// Output: 101001
@@ -58,15 +58,15 @@ func ExampleBitstring_OnesCount() {
 }
 
 func ExampleBitstring_BigInt() {
-	bs, _ := MakeFromString("100")
+	bs, _ := NewFromString("100")
 	bi := bs.BigInt()
 	fmt.Println(bi.Int64())
 	// Output: 4
 }
 
 func ExampleSwapRange() {
-	bs1, _ := MakeFromString("111")
-	bs2, _ := MakeFromString("000")
+	bs1, _ := NewFromString("111")
+	bs2, _ := NewFromString("000")
 	// Swap 2 bits from index 0
 	SwapRange(bs1, bs2, 2, 1)
 	fmt.Println(bs1)
@@ -74,7 +74,7 @@ func ExampleSwapRange() {
 }
 
 func ExampleBitstring_ClearRange() {
-	bs, _ := MakeFromString("10101010")
+	bs, _ := NewFromString("10101010")
 	// Clear the 3 bits at offset 2.
 	bs.ClearRange(2, 3)
 	fmt.Println(bs)
@@ -82,7 +82,7 @@ func ExampleBitstring_ClearRange() {
 }
 
 func ExampleBitstring_SetRange() {
-	bs, _ := MakeFromString("10101010")
+	bs, _ := NewFromString("10101010")
 	// Set the 3 bits at offset 2.
 	bs.SetRange(2, 3)
 	fmt.Println(bs)
@@ -90,7 +90,7 @@ func ExampleBitstring_SetRange() {
 }
 
 func ExampleBitstring_FlipRange() {
-	bs, _ := MakeFromString("10101010")
+	bs, _ := NewFromString("10101010")
 	// Flip the 3 bits at offset 2.
 	bs.FlipRange(2, 3)
 	fmt.Println(bs)

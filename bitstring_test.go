@@ -75,7 +75,7 @@ func TestString(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := MakeFromString(tt.str)
+			got, err := NewFromString(tt.str)
 			if !tt.valid {
 				assert.Nil(t, got)
 				assert.Error(t, err)

@@ -9,7 +9,7 @@ var sink interface{}
 
 func benchmarkUintn(b *testing.B, nbits, i int) {
 	b.ReportAllocs()
-	bs, _ := MakeFromString("0000000000000000000000000000000101000000000000000000000000000000")
+	bs, _ := NewFromString("0000000000000000000000000000000101000000000000000000000000000000")
 	var v uint64
 	for n := 0; n < b.N; n++ {
 		v = bs.Uintn(nbits, i)
@@ -20,7 +20,7 @@ func benchmarkUintn(b *testing.B, nbits, i int) {
 
 func benchmarkUint64(b *testing.B, i int) {
 	b.ReportAllocs()
-	bs, _ := MakeFromString("00000000000000000000000000000001010000000000000000000000000000000")
+	bs, _ := NewFromString("00000000000000000000000000000001010000000000000000000000000000000")
 	var v uint64
 	for n := 0; n < b.N; n++ {
 		v = bs.Uint64(i)
@@ -31,7 +31,7 @@ func benchmarkUint64(b *testing.B, i int) {
 
 func benchmarkUint32(b *testing.B, i int) {
 	b.ReportAllocs()
-	bs, _ := MakeFromString("0000000000000000000000000000000101000000000000000000000000000000")
+	bs, _ := NewFromString("0000000000000000000000000000000101000000000000000000000000000000")
 	var v uint32
 	for n := 0; n < b.N; n++ {
 		v = bs.Uint32(i)
@@ -42,7 +42,7 @@ func benchmarkUint32(b *testing.B, i int) {
 
 func benchmarkUint16(b *testing.B, i int) {
 	b.ReportAllocs()
-	bs, _ := MakeFromString("0000000000000000000000000000000101000000000000000000000000000000")
+	bs, _ := NewFromString("0000000000000000000000000000000101000000000000000000000000000000")
 	var v uint16
 	for n := 0; n < b.N; n++ {
 		v = bs.Uint16(i)
@@ -53,7 +53,7 @@ func benchmarkUint16(b *testing.B, i int) {
 
 func benchmarkUint8(b *testing.B, i int) {
 	b.ReportAllocs()
-	bs, _ := MakeFromString("0000000000000000000000000000000101000000000000000000000000000000")
+	bs, _ := NewFromString("0000000000000000000000000000000101000000000000000000000000000000")
 	var v uint8
 	for n := 0; n < b.N; n++ {
 		v = bs.Uint8(i)
@@ -164,7 +164,7 @@ var vals = []string{
 }
 
 func benchmarkOnesCount(b *testing.B, val string) {
-	bs, err := MakeFromString(val)
+	bs, err := NewFromString(val)
 	if err != nil {
 		b.Fatal(err)
 	}
