@@ -14,7 +14,9 @@ jobs:
           go-version: ${{ matrix.go-version }}
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Test
+      - name: Test and coverage
         run: |
-          go test
+          go test -coverprofile coverage.txt
           go test -tags bitstring_debug .
+      - name: Codecov
+        run: bash <(curl -s https://codecov.io/bash)
