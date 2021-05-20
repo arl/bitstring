@@ -3,73 +3,63 @@ package bitstring
 import "fmt"
 
 func ExampleNew() {
-	// create a 8 bits Bitstring
-	bitstring := New(8)
+	// Create a 32-bit Bitstring
+	bs := New(32)
 	// upon creation all bits are unset
-	fmt.Println(bitstring)
-	// Output: 00000000
+	fmt.Println(bs)
+	// Output: 00000000000000000000000000000000
 }
 
 func ExampleMakeFromString() {
-	// create a Bitstring from string
-	bitstring, _ := MakeFromString("101001")
-	fmt.Println(bitstring)
+	// Create a Bitstring from a string made of 0's and 1's.
+	bs, _ := MakeFromString("101001")
+	fmt.Println(bs)
+	fmt.Println(bs.Len(), "bits")
 	// Output: 101001
-}
-
-func ExampleBitstring_Len() {
-	// create a 8 bits Bitstring
-	bitstring := New(8)
-	fmt.Println(bitstring.Len())
-	// Output: 8
-}
-
-func ExampleBitstring_Bit() {
-	// create a 8 bits Bitstring
-	bitstring := New(8)
-	fmt.Println(bitstring.Bit(7))
-	// Output: false
+	// 6 bits
 }
 
 func ExampleBitstring_SetBit() {
-	// create a 8 bits Bitstring
-	bitstring := New(8)
-	bitstring.SetBit(2)
-	fmt.Println(bitstring)
-	bitstring.ClearBit(2)
-	fmt.Println(bitstring)
+	bs := New(8)
+	bs.SetBit(2)
+	fmt.Println("bit 2:", bs.Bit(2))
+	fmt.Println("bit 7:", bs.Bit(7))
+	// Output: bit 2: true
+	// bit 7: false
+}
+
+func ExampleBitstring_ClearBit() {
+	bs := New(8)
+	bs.SetBit(2)
+	fmt.Println(bs)
+	bs.ClearBit(2)
+	fmt.Println(bs)
 	// Output: 00000100
 	// 00000000
 }
 
 func ExampleBitstring_FlipBit() {
-	// create a 8 bits Bitstring
-	bitstring := New(8)
-	bitstring.FlipBit(2)
-	fmt.Println(bitstring)
+	bs := New(8)
+	bs.FlipBit(2)
+	fmt.Println(bs)
 	// Output: 00000100
 }
 
 func ExampleBitstring_ZeroesCount() {
-	// create a 8 bits Bitstring
-	bitstring := New(8)
-	// upon creation all bits are unset
-	fmt.Println(bitstring.ZeroesCount())
+	bs := New(8)
+	fmt.Println(bs.ZeroesCount())
 	// Output: 8
 }
 
 func ExampleBitstring_OnesCount() {
-	// create a 8 bits Bitstring
 	bitstring := New(8)
-	// upon creation all bits are unset
 	fmt.Println(bitstring.OnesCount())
 	// Output: 0
 }
 
 func ExampleBitstring_BigInt() {
-	// create a 8 bits Bitstring
-	bitstring, _ := MakeFromString("100")
-	bi := bitstring.BigInt()
+	bs, _ := MakeFromString("100")
+	bi := bs.BigInt()
 	fmt.Println(bi.Int64())
 	// Output: 4
 }
@@ -77,7 +67,7 @@ func ExampleBitstring_BigInt() {
 func ExampleSwapRange() {
 	bs1, _ := MakeFromString("111")
 	bs2, _ := MakeFromString("000")
-	// starting from bit 2 of bs1, swap 1 bit with bs2
+	// Swap 2 bits from index 0
 	SwapRange(bs1, bs2, 2, 1)
 	fmt.Println(bs1)
 	// Output: 011
