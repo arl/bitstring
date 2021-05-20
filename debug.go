@@ -7,7 +7,7 @@ import "fmt"
 // mustExist panics if i is not a valid bit index for bs, that is if i is
 // greater than bs.length.
 func (bs *Bitstring) mustExist(i int) {
-	if i >= bs.length || i < 0 {
+	if i >= bs.length {
 		panic(fmt.Sprintf("Bitstring: index %d is out of range [%d, %d]", i, 0, bs.length))
 	}
 }
