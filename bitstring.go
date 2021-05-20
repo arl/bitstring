@@ -216,6 +216,7 @@ func (bs *Bitstring) Equals(other *Bitstring) bool {
 	return false
 }
 
+/*
 // RotateLeft rotates the bitstring by (k mod len) bits.
 func (bs *Bitstring) RotateLeft(k int) {
 	panic("unimplemented")
@@ -240,3 +241,4 @@ func (bs *Bitstring) LeadingZeros() int {
 func (bs *Bitstring) TrailingZeros() int {
 	panic("unimplemented")
 }
+*/
