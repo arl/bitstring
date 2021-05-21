@@ -164,14 +164,6 @@ func (bs *Bitstring) SetUint64(off int, val uint64) {
 		return
 	}
 
-	k := wordoffset(i64 + 63)
-	if j == k {
-		// fast path: same word
-		neww := uint64(val) << lobit
-		msk := mask(lobit, lobit+64)
-		bs.data[j] = transferbits(bs.data[j], neww, msk)
-		return
-	}
 	// Transfer bits to low word.
 	bs.data[j] = transferbits(bs.data[j], uint64(val)<<lobit, himask(lobit))
 	// Transfer bits to high word.

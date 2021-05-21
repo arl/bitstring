@@ -148,9 +148,8 @@ func (bs *Bitstring) ZeroesCount() int {
 // BigInt returns the big.Int representation of bs.
 func (bs *Bitstring) BigInt() *big.Int {
 	bi := new(big.Int)
-	if _, ok := bi.SetString(bs.String(), 2); !ok {
-		panic(fmt.Sprintf("couldn't convert bit string \"%s\" to big.Int", bs.String()))
-	}
+	_, _ = bi.SetString(bs.String(), 2)
+
 	return bi
 }
 
@@ -205,14 +204,7 @@ func (bs *Bitstring) Equals(other *Bitstring) bool {
 		bs == nil && other != nil:
 		return false
 	case bs.length == other.length:
-		// Above this threshold, unsafe uint64 comparison (cast to []byte) gets faster.
-		const unsafe_threshold = 128
-
-		if len(bs.data) < unsafe_threshold {
-			return u64cmp(bs.data, other.data)
-		}
-
-		return bytesEq(bs.data, other.data)
+		return u64cmp(bs.data, other.data)
 	}
 	return false
 }

@@ -164,6 +164,12 @@ func TestNbits(t *testing.T) {
 	}
 }
 
+func TestUintnPanic(t *testing.T) {
+	bs := New(64)
+	assert.Panics(t, func() { bs.Uintn(0, 65) })
+	assert.Panics(t, func() { bs.SetUintn(0, 65, 0) })
+}
+
 func TestSet8bits(t *testing.T) {
 	tests := []struct {
 		str  string // starting bitstring
