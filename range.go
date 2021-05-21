@@ -9,22 +9,22 @@ func minuint(x, y uint64) uint64 {
 
 // SwapRange swaps a range of bits between 2 bitstrings.
 //
-// The range [start, start+length) must exist on both bitstrings or SwapRange
-// has undefined behavior.
+// The range [off, off+len) must exist on both bitstrings or SwapRange has
+// undefined behavior.
 func SwapRange(bs1, bs2 *Bitstring, off, len int) {
 	bs1.mustExist(off + len - 1)
 	bs2.mustExist(off + len - 1)
 
 	// Swap bits in the first word.
-	start64, len64 := uint64(off), uint64(len)
-	i := wordoffset(start64)
-	start64 = bitoffset(start64)
-	end := minuint(start64+len64, uintsize)
-	swapBits(bs1, bs2, i, mask(start64, end))
+	start, l := uint64(off), uint64(len)
+	i := wordoffset(start)
+	start = bitoffset(start)
+	end := minuint(start+l, uintsize)
+	swapBits(bs1, bs2, i, mask(start, end))
 	i++
 
 	// Swap whole words but the last one.
-	remain := len64 - (end - start64)
+	remain := l - (end - start)
 	for remain > uintsize {
 		bs1.data[i], bs2.data[i] = bs2.data[i], bs1.data[i]
 		remain -= uintsize
@@ -50,26 +50,26 @@ func swapBits(x, y *Bitstring, w, mask uint64) {
 
 // EqualRange compares a given range of bits between 2 bitstrings.
 //
-// It's like Equals but only compares the [start, start+length) range.
-// EqualRange returns false if this range is not defined on both bitstrings.
-func EqualRange(bs1, bs2 *Bitstring, start, length int) bool {
-	if start+length-1 >= bs1.length || start+length-1 >= bs2.length {
+// It's like Equals but only compares the [off, off+length) range. EqualRange
+// returns false if this range is not defined on both bitstrings.
+func EqualRange(bs1, bs2 *Bitstring, off, len int) bool {
+	if off+len-1 >= bs1.length || off+len-1 >= bs2.length {
 		return false
 	}
 
 	// Compare bits in the first word.
-	start64, len64 := uint64(start), uint64(length)
-	i := wordoffset(start64)
-	start64 = bitoffset(start64)
-	end := minuint(start64+len64, uintsize)
-	m := mask(start64, end)
+	start, l := uint64(off), uint64(len)
+	i := wordoffset(start)
+	start = bitoffset(start)
+	end := minuint(start+l, uintsize)
+	m := mask(start, end)
 	if bs1.data[i]&m != bs2.data[i]&m {
 		return false
 	}
 	i++
 
 	// Compare all words but the last one.
-	remain := len64 - (end - start64)
+	remain := l - (end - start)
 	j := i + (remain / uintsize)
 	if !u64cmp(bs1.data[i:j], bs2.data[i:j]) {
 		return false
@@ -88,21 +88,20 @@ func EqualRange(bs1, bs2 *Bitstring, start, length int) bool {
 
 // SetRange sets a range of bits (sets all bits to 1).
 //
-// The range [start, start+length) must exist or SetBitRange has undefined
-// behavior.
-func (bs *Bitstring) SetRange(start, length int) {
-	bs.mustExist(start + length - 1)
+// The range [off, off+len) must exist or SetBitRange has undefined behavior.
+func (bs *Bitstring) SetRange(off, len int) {
+	bs.mustExist(off + len - 1)
 
-	// Sets bits in the first word.
-	start64, len64 := uint64(start), uint64(length)
-	i := wordoffset(start64)
-	start64 = bitoffset(start64)
-	end := minuint(start64+len64, uintsize)
-	bs.data[i] |= mask(start64, end)
+	// Set bits in the first word.
+	start, l := uint64(off), uint64(len)
+	i := wordoffset(start)
+	start = bitoffset(start)
+	end := minuint(start+l, uintsize)
+	bs.data[i] |= mask(start, end)
 	i++
 
 	// Set bits in all words but the last one.
-	remain := len64 - (end - start64)
+	remain := l - (end - start)
 	for remain > uintsize {
 		bs.data[i] = maxuint
 		remain -= uintsize
@@ -117,21 +116,20 @@ func (bs *Bitstring) SetRange(start, length int) {
 
 // ClearRange clears a range of bits (sets all bits to 0).
 //
-// The range [start, start+length) must exist or ClearRange has undefined
-// behavior.
-func (bs *Bitstring) ClearRange(start, length int) {
-	bs.mustExist(start + length - 1)
+// The range [off, off+length) must exist or ClearRange has undefined behavior.
+func (bs *Bitstring) ClearRange(off, len int) {
+	bs.mustExist(off + len - 1)
 
-	// Clears bits in the first word.
-	start64, len64 := uint64(start), uint64(length)
-	i := wordoffset(start64)
-	start64 = bitoffset(start64)
-	end := minuint(start64+len64, uintsize)
-	bs.data[i] &= ^mask(start64, end)
+	// Clear bits in the first word.
+	start, l := uint64(off), uint64(len)
+	i := wordoffset(start)
+	start = bitoffset(start)
+	end := minuint(start+l, uintsize)
+	bs.data[i] &= ^mask(start, end)
 	i++
 
-	// Clears bits in all words but the last one.
-	remain := len64 - (end - start64)
+	// Clear bits in all words but the last one.
+	remain := l - (end - start)
 	for remain > uintsize {
 		bs.data[i] = 0
 		remain -= uintsize
@@ -146,21 +144,20 @@ func (bs *Bitstring) ClearRange(start, length int) {
 
 // FlipRange flips a range of bits (flips the value of every bit).
 //
-// The range [start, start+length) must exist or FlipRange has undefined
-// behavior.
-func (bs *Bitstring) FlipRange(start, length int) {
-	bs.mustExist(start + length - 1)
+// The range [off, off+len) must exist or FlipRange has undefined behavior.
+func (bs *Bitstring) FlipRange(off, len int) {
+	bs.mustExist(off + len - 1)
 
-	// Flips bits in the first word.
-	start64, len64 := uint64(start), uint64(length)
-	i := wordoffset(start64)
-	start64 = bitoffset(start64)
-	end := minuint(start64+len64, uintsize)
-	bs.data[i] ^= mask(start64, end)
+	// Flip bits in the first word.
+	start, l := uint64(off), uint64(len)
+	i := wordoffset(start)
+	start = bitoffset(start)
+	end := minuint(start+l, uintsize)
+	bs.data[i] ^= mask(start, end)
 	i++
 
-	// Flips bits in all words but the last one.
-	remain := len64 - (end - start64)
+	// Flip bits in all words but the last one.
+	remain := l - (end - start)
 	for remain > uintsize {
 		bs.data[i] ^= maxuint
 		remain -= uintsize
