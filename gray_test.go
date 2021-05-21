@@ -104,7 +104,7 @@ func TestGrayn(t *testing.T) {
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
 			bs, _ := NewFromString(tt.input)
-			got := bs.Grayn(tt.nbits, 0)
+			got := bs.Grayn(0, tt.nbits)
 			if tt.want != got {
 				t.Errorf("Bitstring(%s).Grayn(%d, 0) got %s, want %s", tt.input, tt.nbits,
 					sprintubits(uint64(got), tt.nbits), sprintubits(uint64(tt.want), tt.nbits))

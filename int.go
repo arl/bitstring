@@ -1,46 +1,254 @@
 package bitstring
 
-/* get */
+import "fmt"
 
-// Int8 returns the int8 value represented by the 8 bits starting at the
-// given bit. It panics if there are not enough bits.
-func (bs *Bitstring) Int8(i int) int8 { return int8(bs.Uint8(i)) }
+/* unsigned integer get */
 
-// Int16 returns the int16 value represented by the 16 bits starting at the
-// given bit. It panics if there are not enough bits.
-func (bs *Bitstring) Int16(i int) int16 { return int16(bs.Uint16(i)) }
+// Uint8 interprets the 8 bits at offset off as an uint8 in big endian and
+// returns its value. Behavior is undefined if there aren't enough bits.
+func (bs *Bitstring) Uint8(off int) uint8 {
+	bs.mustExist(off + 7)
 
-// Int32 returns the int32 value represented by the 32 bits starting at the
-// given bit. It panics if there are not enough bits.
-func (bs *Bitstring) Int32(i int) int32 { return int32(bs.Uint32(i)) }
+	return uint8(bs.uint(uint64(off), 7))
+}
 
-// Intn returns the n-bit signed integer value represented by the n bits
-// starting at the i. It panics if there are not enough bits or if n is greater
-// than the size of a machine word.
-func (bs *Bitstring) Intn(i, nbits int) int64 { return int64(bs.Uintn(i, nbits)) }
+// Uint16 interprets the 16 bits at offset off as an uint16 in big endian and
+// returns its value. Behavior is undefined if there aren't enough bits.
+func (bs *Bitstring) Uint16(off int) uint16 {
+	bs.mustExist(off + 15)
 
-// Int64 returns the int64 value represented by the 64 bits starting at the
-// given bit. It panics if there are not enough bits.
-func (bs *Bitstring) Int64(i int) int64 { return int64(bs.Uint64(i)) }
+	return uint16(bs.uint(uint64(off), 15))
+}
 
-/* set */
+// Uint32 interprets the 32 bits at offset off as an uint32 in big endian and
+// returns its value. Behavior is undefined if there aren't enough bits.
+func (bs *Bitstring) Uint32(off int) uint32 {
+	bs.mustExist(off + 31)
 
-// SetInt8 sets the 8 bits starting at i with the value of x. It panics if
-// there are not enough bits.
-func (bs *Bitstring) SetInt8(i int, x int8) { bs.SetUint8(i, uint8(x)) }
+	return uint32(bs.uint(uint64(off), 31))
+}
 
-// SetInt16 sets the 16 bits starting at i with the value of x. It panics if
-// there are not enough bits.
-func (bs *Bitstring) SetInt16(i int, x int16) { bs.SetUint16(i, uint16(x)) }
+// Uint64 interprets the 64 bits at offset off as an uint64 in big endian and
+// returns its value. Behavior is undefined if there aren't enough bits.
+func (bs *Bitstring) Uint64(off int) uint64 {
+	bs.mustExist(off + 63)
 
-// SetInt32 sets the 32 bits starting at i with the value of x. It panics if
-// there are not enough bits.
-func (bs *Bitstring) SetInt32(i int, x int32) { bs.SetUint32(i, uint32(x)) }
+	// fast path: i is a multiple of 64
+	if off&((1<<6)-1) == 0 {
+		return uint64(bs.data[off>>6])
+	}
 
-// SetInt64 sets the 64 bits starting at i with the value of x. It panics if
-// there are not enough bits.
-func (bs *Bitstring) SetInt64(i int, x int64) { bs.SetUint64(i, uint64(x)) }
+	i64 := uint64(off)
+	w := wordoffset(i64)
+	bit := bitoffset(i64)
+	loword := bs.data[w] >> bit
+	hiword := bs.data[w+1] & ((1 << bit) - 1)
+	return uint64(loword | hiword<<(uintsize-bit))
+}
 
-// SetIntn sets the n bits starting at i with the first n bits of value x. It
-// panics if there aren't enough bits in bs or if n is greater than 64.
-func (bs *Bitstring) SetIntn(i, n int, x int64) { bs.SetUintn(i, n, uint64(x)) }
+// Uintn interprets the n bits at offset off as an n-bit unsigned integer in big
+// endian and returns its value. Behavior is undefined if there aren't enough
+// bits. Panics if nbits is greater than 64.
+func (bs *Bitstring) Uintn(off, n int) uint64 {
+	if n > uintsize || n < 1 {
+		panic(fmt.Sprintf("Uintn supports unsigned integers from 1 to %d bits long", uintsize))
+	}
+	bs.mustExist(off + n - 1)
+
+	i64, n64 := uint64(off), uint64(n)
+	j := wordoffset(i64)
+	k := wordoffset(i64 + n64 - 1)
+	looff := bitoffset(i64)
+	loword := bs.data[j]
+	if j == k {
+		// fast path: same word
+		return (loword >> looff) & lomask(n64)
+	}
+	hioff := bitoffset(i64 + n64)
+	hiword := bs.data[k] & lomask(hioff)
+	loword = himask(looff) & loword >> looff
+	return loword | hiword<<(uintsize-looff)
+}
+
+func (bs *Bitstring) uint(off, n uint64) uint64 {
+	bit := bitoffset(off)
+	loword := bs.data[wordoffset(off)] >> bit
+	hiword := bs.data[wordoffset(off+n)] & ((1 << bit) - 1)
+	return loword | hiword<<(uintsize-bit)
+}
+
+/* unsigned integer set */
+
+// SetUint8 sets the 8 bits at offset off with the given int8 value, in big
+// endian. Behavior is undefined if there aren't enough bits.
+func (bs *Bitstring) SetUint8(off int, val uint8) {
+	bs.mustExist(off + 7)
+
+	i64 := uint64(off)
+	lobit := bitoffset(i64)
+	j := wordoffset(i64)
+	k := wordoffset(i64 + 7)
+	if j == k {
+		// fast path: same word
+		lobit := bitoffset(i64)
+		neww := uint64(val) << lobit
+		msk := mask(lobit, lobit+8)
+		bs.data[j] = transferbits(bs.data[j], neww, msk)
+		return
+	}
+	// transfer bits to low word
+	bs.data[j] = transferbits(bs.data[j], uint64(val)<<lobit, himask(lobit))
+	// transfer bits to high word
+	lon := uintsize - lobit
+	bs.data[k] = transferbits(bs.data[k], uint64(val)>>lon, lomask(8-lon))
+}
+
+// SetUint16 sets the 8 bits at offset off with the given int8 value, in big
+// endian. Behavior is undefined if there aren't enough bits.
+func (bs *Bitstring) SetUint16(off int, val uint16) {
+	bs.mustExist(off + 15)
+
+	i64 := uint64(off)
+	lobit := bitoffset(i64)
+	j := wordoffset(i64)
+	k := wordoffset(i64 + 15)
+	if j == k {
+		// fast path: same word
+		neww := uint64(val) << lobit
+		msk := mask(lobit, lobit+16)
+		bs.data[j] = transferbits(bs.data[j], neww, msk)
+		return
+	}
+	// transfer bits to low word
+	bs.data[j] = transferbits(bs.data[j], uint64(val)<<lobit, himask(lobit))
+	// transfer bits to high word
+	lon := uintsize - lobit
+	bs.data[k] = transferbits(bs.data[k], uint64(val)>>lon, lomask(16-lon))
+}
+
+// SetUint32 sets the 8 bits at offset off with the given int8 value, in big
+// endian. Behavior is undefined if there aren't enough bits.
+func (bs *Bitstring) SetUint32(off int, val uint32) {
+	bs.mustExist(off + 31)
+
+	i64 := uint64(off)
+	lobit := bitoffset(i64)
+	j := wordoffset(i64)
+	k := wordoffset(i64 + 31)
+	if j == k {
+		// fast path: same word
+		neww := uint64(val) << lobit
+		msk := mask(lobit, lobit+32)
+		bs.data[j] = transferbits(bs.data[j], neww, msk)
+		return
+	}
+	// transfer bits to low word
+	bs.data[j] = transferbits(bs.data[j], uint64(val)<<lobit, himask(lobit))
+	// transfer bits to high word
+	lon := uintsize - lobit
+	bs.data[k] = transferbits(bs.data[k], uint64(val)>>lon, lomask(32-lon))
+}
+
+// SetUint64 sets the 8 bits at offset off with the given int8 value, in big
+// endian. Behavior is undefined if there aren't enough bits.
+func (bs *Bitstring) SetUint64(off int, val uint64) {
+	bs.mustExist(off + 63)
+
+	i64 := uint64(off)
+	lobit := bitoffset(i64)
+	j := wordoffset(i64)
+
+	// fast path: i is a multiple of 64
+	if off&((1<<6)-1) == 0 {
+		bs.data[off>>6] = val
+		return
+	}
+
+	k := wordoffset(i64 + 63)
+	if j == k {
+		// fast path: same word
+		neww := uint64(val) << lobit
+		msk := mask(lobit, lobit+64)
+		bs.data[j] = transferbits(bs.data[j], neww, msk)
+		return
+	}
+	// transfer bits to low word
+	bs.data[j] = transferbits(bs.data[j], uint64(val)<<lobit, himask(lobit))
+	// transfer bits to high word
+	lon := (uintsize - lobit)
+	bs.data[k] = transferbits(bs.data[k], uint64(val)>>lon, lomask(64-lon))
+}
+
+// SetUintn sets the n bits at offset off with the given n-bit unsigned integer in
+// big endian. Behavior is undefined if there aren't enough bits. Panics if
+// nbits is greater than 64.
+func (bs *Bitstring) SetUintn(off, n int, val uint64) {
+	if n > uintsize || n < 1 {
+		panic(fmt.Sprintf("SetUintn supports unsigned integers from 1 to %d bits long", uintsize))
+	}
+	bs.mustExist(off + n - 1)
+
+	i64, n64 := uint64(off), uint64(n)
+	lobit := bitoffset(i64)
+	j := wordoffset(i64)
+	k := wordoffset(i64 + n64 - 1)
+	if j == k {
+		// fast path: same word
+		x := (val & lomask(n64)) << lobit
+		bs.data[j] = transferbits(bs.data[j], x, mask(lobit, lobit+n64))
+		return
+	}
+	// slow path: first and last bits are on different words
+	// transfer bits to low word
+	lon := uintsize - lobit // how many bits of n we transfer to loword
+	bs.data[j] = transferbits(bs.data[j], val<<lobit, himask(lon))
+
+	// transfer bits to high word
+	bs.data[k] = transferbits(bs.data[k], val>>lon, lomask(n64-lon))
+}
+
+/* signed get */
+
+// Int8 interprets the 8 bits at offset off as an int8 in big endian and
+// returns its value. Behavior is undefined if there aren't enough bits.
+func (bs *Bitstring) Int8(off int) int8 { return int8(bs.Uint8(off)) }
+
+// Int16 interprets the 16 bits at offset off as an int16 in big endian and
+// returns its value. Behavior is undefined if there aren't enough bits.
+func (bs *Bitstring) Int16(off int) int16 { return int16(bs.Uint16(off)) }
+
+// Int32 interprets the 32 bits at offset off as an int32 in big endian and
+// returns its value. Behavior is undefined if there aren't enough bits.
+func (bs *Bitstring) Int32(off int) int32 { return int32(bs.Uint32(off)) }
+
+// Int64 interprets the 64 bits at offset off as an int64 in big endian and
+// returns its value. Behavior is undefined if there aren't enough bits.
+func (bs *Bitstring) Int64(off int) int64 { return int64(bs.Uint64(off)) }
+
+// Intn interprets the n bits at offset off as an n-bit signed integer in big
+// endian and returns its value. Behavior is undefined if there aren't enough
+// bits. Panics if nbits is greater than 64.
+func (bs *Bitstring) Intn(off, n int) int64 { return int64(bs.Uintn(off, n)) }
+
+/* signed integer set */
+
+// SetInt8 sets the 8 bits at offset off with the given int8 value, in big
+// endian. Behavior is undefined if there aren't enough bits.
+func (bs *Bitstring) SetInt8(off int, val int8) { bs.SetUint8(off, uint8(val)) }
+
+// SetInt16 sets the 16 bits at offset off with the given int16 value, in big
+// endian. Behavior is undefined if there aren't enough bits.
+func (bs *Bitstring) SetInt16(off int, val int16) { bs.SetUint16(off, uint16(val)) }
+
+// SetInt32 sets the 32 bits at offset off with the given int32 value, in big
+// endian. Behavior is undefined if there aren't enough bits.
+func (bs *Bitstring) SetInt32(off int, val int32) { bs.SetUint32(off, uint32(val)) }
+
+// SetInt64 sets the 64 bits at offset off with the given int64 value, in big
+// endian. Behavior is undefined if there aren't enough bits.
+func (bs *Bitstring) SetInt64(off int, val int64) { bs.SetUint64(off, uint64(val)) }
+
+// SetIntn sets the n bits at offset off with the given n-bit signed integer in
+// big endian. Behavior is undefined if there aren't enough bits. Panics if
+// nbits is greater than 64.
+func (bs *Bitstring) SetIntn(off, n int, val int64) { bs.SetUintn(off, n, uint64(val)) }

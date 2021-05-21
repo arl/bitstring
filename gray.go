@@ -1,19 +1,21 @@
 package bitstring
 
-// Gray8 returns the uint8 value represented by the 8 gray-coded bits starting
-// at the given bit. It panics if there are not enough bits.
-func (bs *Bitstring) Gray8(i int) uint8 {
-	v := bs.Uint8(i)
+// Gray8 interprets the 8 bits at offset off as a gray-coded uint8 in big
+// endian and returns its value. Behavior is undefined if there aren't enough
+// bits.
+func (bs *Bitstring) Gray8(val int) uint8 {
+	v := bs.Uint8(val)
 	v ^= v >> 4
 	v ^= v >> 2
 	v ^= v >> 1
 	return v
 }
 
-// Gray16 returns the uint8 value represented by the 16 gray-coded bits starting
-// at the given bit. It panics if there are not enough bits.
-func (bs *Bitstring) Gray16(i int) uint16 {
-	v := bs.Uint16(i)
+// Gray16 interprets the 16 bits at offset off as a gray-coded uint16 in big
+// endian and returns its value. Behavior is undefined if there aren't enough
+// bits.
+func (bs *Bitstring) Gray16(val int) uint16 {
+	v := bs.Uint16(val)
 	v ^= v >> 8
 	v ^= v >> 4
 	v ^= v >> 2
@@ -21,10 +23,11 @@ func (bs *Bitstring) Gray16(i int) uint16 {
 	return v
 }
 
-// Gray32 returns the uint32 value represented by the 32 gray-coded bits starting
-// at the given bit. It panics if there are not enough bits.
-func (bs *Bitstring) Gray32(i int) uint32 {
-	v := bs.Uint32(i)
+// Gray32 interprets the 32 bits at offset off as a gray-coded uint32 in big
+// endian and returns its value. Behavior is undefined if there aren't enough
+// bits.
+func (bs *Bitstring) Gray32(val int) uint32 {
+	v := bs.Uint32(val)
 	v ^= v >> 16
 	v ^= v >> 8
 	v ^= v >> 4
@@ -33,10 +36,11 @@ func (bs *Bitstring) Gray32(i int) uint32 {
 	return v
 }
 
-// Gray64 returns the uint64 value represented by the 64 gray-coded bits starting
-// at the given bit. It panics if there are not enough bits.
-func (bs *Bitstring) Gray64(i int) uint64 {
-	v := bs.Uint64(i)
+// Gray64 interprets the 64 bits at offset off as a gray-coded uint64 in big
+// endian and returns its value. Behavior is undefined if there aren't enough
+// bits.
+func (bs *Bitstring) Gray64(val int) uint64 {
+	v := bs.Uint64(val)
 	v ^= v >> 32
 	v ^= v >> 16
 	v ^= v >> 8
@@ -46,11 +50,11 @@ func (bs *Bitstring) Gray64(i int) uint64 {
 	return v
 }
 
-// Grayn returns the n-bit unsigned integer value represented by the n
-// gray-coded bits starting at the bit index i. It panics if there are not
-// enough bits or if n is greater than the size of a machine word.
-func (bs *Bitstring) Grayn(nbits, i int) uint64 {
-	v := bs.Uintn(i, nbits)
+// Grayn interprets the n bits at offset off as an n-bit gray-coded signed
+// integer in big endian and returns its value. Behavior is undefined if there
+// aren't enough bits. Panics if nbits is greater than 64.
+func (bs *Bitstring) Grayn(off, n int) uint64 {
+	v := bs.Uintn(off, n)
 	v ^= v >> 32
 	v ^= v >> 16
 	v ^= v >> 8
