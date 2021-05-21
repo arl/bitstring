@@ -70,15 +70,11 @@ func EqualRange(bs1, bs2 *Bitstring, start, length int) bool {
 	i++
 
 	// Compare whole words but the last one.
-	for remain > uintsize {
-		// TODO: see if we can greatly improve performance with unsafe tricks
-		// (cast to byte and use bytes.Compare)
-		if bs1.data[i] != bs2.data[i] {
-			return false
-		}
-		remain -= uintsize
-		i++
+	j := i + (remain / uintsize)
+	if !u64cmp(bs1.data[i:j], bs2.data[i:j]) {
+		return false
 	}
+	i = j
 
 	// Swap the remaining bits of the last word.
 	if remain != 0 {
