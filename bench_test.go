@@ -102,7 +102,7 @@ func BenchmarkSwapRange(b *testing.B) {
 	b.ResetTimer()
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		SwapRange(x, y, 1, 1024)
+		SwapRange(x, y, i%26, 1026)
 	}
 }
 
@@ -119,18 +119,27 @@ func BenchmarkRandom(b *testing.B) {
 	sink = x
 }
 
-func BenchmarkEquals(b *testing.B) {
-	rng := rand.New(rand.NewSource(99))
-	x := Random(1026, rng)
-	y := Clone(x)
-	var res bool
-	b.ResetTimer()
-	b.ReportAllocs()
-	for i := 0; i < b.N; i++ {
-		res = x.Equals(y)
+func benchmarkEquals(len int) func(b *testing.B) {
+	return func(b *testing.B) {
+		x, y := New(len), New(len)
+		var res bool
+		b.ResetTimer()
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			res = x.Equals(y)
+		}
+		b.StopTimer()
+		sink = res
 	}
-	b.StopTimer()
-	sink = res
+}
+
+func BenchmarkEquals(b *testing.B) {
+	b.Run("len=100", benchmarkEquals(100))
+	b.Run("len=500", benchmarkEquals(500))
+	b.Run("len=1000", benchmarkEquals(1000))
+	b.Run("len=2000", benchmarkEquals(2000))
+	b.Run("len=4000", benchmarkEquals(4000))
+	b.Run("len=8000", benchmarkEquals(8000))
 }
 
 func BenchmarkSetUint8(b *testing.B) {

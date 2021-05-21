@@ -205,13 +205,14 @@ func (bs *Bitstring) Equals(other *Bitstring) bool {
 		bs == nil && other != nil:
 		return false
 	case bs.length == other.length:
-		od := other.data[:len(bs.data)] // remove BCE
-		for i, v := range bs.data {
-			if v != od[i] {
-				return false
-			}
+		// Above this threshold, unsafe uint64 comparison (cast to []byte) gets faster.
+		const unsafe_threshold = 128
+
+		if len(bs.data) < unsafe_threshold {
+			return u64cmp(bs.data, other.data)
 		}
-		return true
+
+		return bytesEq(bs.data, other.data)
 	}
 	return false
 }
