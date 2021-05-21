@@ -18,7 +18,7 @@ Package `bitstring` implements a fixed length bit string type and bit manipulati
  - Count ones/zeroes: `ZeroesCount`|`OnesCount`
  - Gray code conversion methods: `Gray8`|`Gray16`|`Gray32`|`Gray64`|`Grayn`
  - Convert to `big.Int`: `BigInt`
- - Copy/Clone methods: `Copy`|`Clone`
+ - Copy/Clone methods: `Copy`|`Clone`|`CopyRange`
 
 
 # Debug version
@@ -33,5 +33,4 @@ when building the `bitstring` package.
 **TODO**:
  - RotateLeft/Right
  - Trailing/Leading zeroes/ones
- - BitString.Range() returns a new bitstring, containing the bits in the given range
  - Or, And, Xor,etc between bitstrings
