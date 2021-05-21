@@ -1,5 +1,6 @@
-// Package bitstring implements a fixed length bit string type and bit string
-// manipulation functions
+// Package bitstring implements a fixed length bit string type and bit
+// manipulation functions.
+
 package bitstring
 
 import (
