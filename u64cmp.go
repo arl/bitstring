@@ -8,15 +8,21 @@ import (
 
 // invariant: len(a) == len(b)
 func u64cmp(a, b []uint64) bool {
-	b = b[:len(a)] // remove BCE
+	// Above this threshold, unsafe uint64 comparison
+	// (cast to []byte) is faster)
+	const unsafe_threshold = 128
 
-	for i := 0; i < len(a); i++ {
-		if a[i] != b[i] {
-			return false
+	if len(a) < unsafe_threshold {
+		b = b[:len(a)] // remove BCE
+
+		for i := 0; i < len(a); i++ {
+			if a[i] != b[i] {
+				return false
+			}
 		}
 	}
 
-	return true
+	return bytesEq(a, b)
 }
 
 func bytesEq(a, b []uint64) bool {
