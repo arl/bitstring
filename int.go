@@ -33,8 +33,8 @@ func (bs *Bitstring) Uint32(off int) uint32 {
 func (bs *Bitstring) Uint64(off int) uint64 {
 	bs.mustExist(off + 63)
 
-	// fast path: i is a multiple of 64
 	if off&((1<<6)-1) == 0 {
+		// Fast path: off is a multiple of 64.
 		return uint64(bs.data[off>>6])
 	}
 
@@ -61,7 +61,7 @@ func (bs *Bitstring) Uintn(off, n int) uint64 {
 	looff := bitoffset(i64)
 	loword := bs.data[j]
 	if j == k {
-		// fast path: same word
+		// Fast path: value doesn't cross uint64 boundaries.
 		return (loword >> looff) & lomask(n64)
 	}
 	hioff := bitoffset(i64 + n64)
@@ -89,16 +89,16 @@ func (bs *Bitstring) SetUint8(off int, val uint8) {
 	j := wordoffset(i64)
 	k := wordoffset(i64 + 7)
 	if j == k {
-		// fast path: same word
+		// Fast path: value doesn't cross uint64 boundaries.
 		lobit := bitoffset(i64)
 		neww := uint64(val) << lobit
 		msk := mask(lobit, lobit+8)
 		bs.data[j] = transferbits(bs.data[j], neww, msk)
 		return
 	}
-	// transfer bits to low word
+	// Transfer bits to low word.
 	bs.data[j] = transferbits(bs.data[j], uint64(val)<<lobit, himask(lobit))
-	// transfer bits to high word
+	// Transfer bits to high word.
 	lon := uintsize - lobit
 	bs.data[k] = transferbits(bs.data[k], uint64(val)>>lon, lomask(8-lon))
 }
@@ -113,15 +113,15 @@ func (bs *Bitstring) SetUint16(off int, val uint16) {
 	j := wordoffset(i64)
 	k := wordoffset(i64 + 15)
 	if j == k {
-		// fast path: same word
+		// Fast path: value doesn't cross uint64 boundaries.
 		neww := uint64(val) << lobit
 		msk := mask(lobit, lobit+16)
 		bs.data[j] = transferbits(bs.data[j], neww, msk)
 		return
 	}
-	// transfer bits to low word
+	// Transfer bits to low word.
 	bs.data[j] = transferbits(bs.data[j], uint64(val)<<lobit, himask(lobit))
-	// transfer bits to high word
+	// Transfer bits to high word.
 	lon := uintsize - lobit
 	bs.data[k] = transferbits(bs.data[k], uint64(val)>>lon, lomask(16-lon))
 }
@@ -136,15 +136,15 @@ func (bs *Bitstring) SetUint32(off int, val uint32) {
 	j := wordoffset(i64)
 	k := wordoffset(i64 + 31)
 	if j == k {
-		// fast path: same word
+		// Fast path: value doesn't cross uint64 boundaries.
 		neww := uint64(val) << lobit
 		msk := mask(lobit, lobit+32)
 		bs.data[j] = transferbits(bs.data[j], neww, msk)
 		return
 	}
-	// transfer bits to low word
+	// Transfer bits to low word.
 	bs.data[j] = transferbits(bs.data[j], uint64(val)<<lobit, himask(lobit))
-	// transfer bits to high word
+	// Transfer bits to high word.
 	lon := uintsize - lobit
 	bs.data[k] = transferbits(bs.data[k], uint64(val)>>lon, lomask(32-lon))
 }
@@ -158,8 +158,8 @@ func (bs *Bitstring) SetUint64(off int, val uint64) {
 	lobit := bitoffset(i64)
 	j := wordoffset(i64)
 
-	// fast path: i is a multiple of 64
 	if off&((1<<6)-1) == 0 {
+		// Fast path: off is a multiple of 64.
 		bs.data[off>>6] = val
 		return
 	}
@@ -172,10 +172,11 @@ func (bs *Bitstring) SetUint64(off int, val uint64) {
 		bs.data[j] = transferbits(bs.data[j], neww, msk)
 		return
 	}
-	// transfer bits to low word
+	// Transfer bits to low word.
 	bs.data[j] = transferbits(bs.data[j], uint64(val)<<lobit, himask(lobit))
-	// transfer bits to high word
+	// Transfer bits to high word.
 	lon := (uintsize - lobit)
+	k := wordoffset(i64 + 63)
 	bs.data[k] = transferbits(bs.data[k], uint64(val)>>lon, lomask(64-lon))
 }
 
@@ -193,17 +194,18 @@ func (bs *Bitstring) SetUintn(off, n int, val uint64) {
 	j := wordoffset(i64)
 	k := wordoffset(i64 + n64 - 1)
 	if j == k {
-		// fast path: same word
+		// Fast path: value doesn't cross uint64 boundaries.
 		x := (val & lomask(n64)) << lobit
 		bs.data[j] = transferbits(bs.data[j], x, mask(lobit, lobit+n64))
 		return
 	}
-	// slow path: first and last bits are on different words
-	// transfer bits to low word
+
+	// First and last bits are on different words.
+	// Transfer bits to low word.
 	lon := uintsize - lobit // how many bits of n we transfer to loword
 	bs.data[j] = transferbits(bs.data[j], val<<lobit, himask(lon))
 
-	// transfer bits to high word
+	// Transfer bits to high word.
 	bs.data[k] = transferbits(bs.data[k], val>>lon, lomask(n64-lon))
 }
 
