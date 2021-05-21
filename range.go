@@ -169,3 +169,34 @@ func (bs *Bitstring) FlipRange(off, len int) {
 		bs.data[i] ^= lomask(remain)
 	}
 }
+
+// CopyRange returns a new Bitstring with a copy of the bits in the [off,
+// off+len] range.
+func (bs *Bitstring) CopyRange(off, len int) *Bitstring {
+	bs.mustExist(off + len - 1)
+
+	ret := New(len)
+
+	// Copy the bits in the first word.
+	start, l := uint64(off), uint64(len)
+	i := wordoffset(start)
+	start = bitoffset(start)
+	end := minuint(start+l, uintsize)
+	mask := mask(start, end)
+	ret.data[0] = bs.data[i] & mask
+	i++
+
+	// Copy all words but the last one.
+	remain := l - (end - start)
+	j := i + (remain / uintsize)
+	n := copy(ret.data[1:], bs.data[i:j])
+	remain -= uint64(n) * uintsize
+
+	// Copy bits in the last word.
+	if remain != 0 {
+		mask := lomask(remain)
+		ret.data[n+1] = bs.data[j] & mask
+	}
+
+	return ret
+}

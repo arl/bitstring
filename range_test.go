@@ -1,6 +1,7 @@
 package bitstring
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -554,4 +555,23 @@ func TestEqualRange(t *testing.T) {
 			assert.Equal(t, tt.want, EqualRange(x, y, tt.start, tt.length))
 		})
 	}
+}
+
+func TestCopyRange(t *testing.T) {
+	_1029_ones := strings.Repeat("1", 1029)
+	_128_ones := strings.Repeat("1", 128)
+	_63_ones := strings.Repeat("1", 63)
+	bs, _ := NewFromString(_1029_ones)
+
+	bs1 := bs.CopyRange(0, 1)
+	assert.Equal(t, "1", bs1.String())
+
+	bs1 = bs.CopyRange(0, 63)
+	assert.Equal(t, _63_ones, bs1.String())
+
+	bs1 = bs.CopyRange(0, 128)
+	assert.Equal(t, _128_ones, bs1.String())
+
+	bs1 = bs.CopyRange(0, 1029)
+	assert.Equal(t, _1029_ones, bs1.String())
 }
