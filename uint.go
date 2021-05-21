@@ -56,8 +56,7 @@ func (bs *Bitstring) uint(i, nbits uint64) uint64 {
 // Uintn returns the n bits unsigned integer value represented by the n bits
 // starting at the bit index i. It panics if there aren't enough bits in bs or
 // if n is greater than the size of a machine word.
-// TODO: reverse order of nbits and i params
-func (bs *Bitstring) Uintn(n, i int) uint64 {
+func (bs *Bitstring) Uintn(i, n int) uint64 {
 	if n > uintsize || n < 1 {
 		panic(fmt.Sprintf("Uintn supports unsigned integers from 1 to %d bits long", uintsize))
 	}
@@ -183,7 +182,7 @@ func (bs *Bitstring) SetUint64(i int, x uint64) {
 // SetUintn sets the n bits starting at i with the first n bits of value x.
 // It panics if there aren't enough bits in bs or if n is greater than
 // the size of a machine word.
-func (bs *Bitstring) SetUintn(n, i int, x uint64) {
+func (bs *Bitstring) SetUintn(i, n int, x uint64) {
 	if n > uintsize || n < 1 {
 		panic(fmt.Sprintf("SetUintn supports unsigned integers from 1 to %d bits long", uintsize))
 	}

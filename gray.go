@@ -50,7 +50,7 @@ func (bs *Bitstring) Gray64(i int) uint64 {
 // gray-coded bits starting at the bit index i. It panics if there are not
 // enough bits or if n is greater than the size of a machine word.
 func (bs *Bitstring) Grayn(nbits, i int) uint64 {
-	v := bs.Uintn(nbits, i)
+	v := bs.Uintn(i, nbits)
 	v ^= v >> 32
 	v ^= v >> 16
 	v ^= v >> 8

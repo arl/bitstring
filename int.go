@@ -17,7 +17,7 @@ func (bs *Bitstring) Int32(i int) int32 { return int32(bs.Uint32(i)) }
 // Intn returns the n-bit signed integer value represented by the n bits
 // starting at the i. It panics if there are not enough bits or if n is greater
 // than the size of a machine word.
-func (bs *Bitstring) Intn(nbits, i int) int32 { return int32(bs.Uintn(nbits, i)) }
+func (bs *Bitstring) Intn(i, nbits int) int64 { return int64(bs.Uintn(i, nbits)) }
 
 // Int64 returns the int64 value represented by the 64 bits starting at the
 // given bit. It panics if there are not enough bits.
@@ -43,4 +43,4 @@ func (bs *Bitstring) SetInt64(i int, x int64) { bs.SetUint64(i, uint64(x)) }
 
 // SetIntn sets the n bits starting at i with the first n bits of value x. It
 // panics if there aren't enough bits in bs or if n is greater than 64.
-func (bs *Bitstring) SetIntn(n, i int, x int64) { bs.SetUintn(n, i, uint64(x)) }
+func (bs *Bitstring) SetIntn(i, n int, x int64) { bs.SetUintn(i, n, uint64(x)) }

@@ -12,7 +12,7 @@ func benchmarkUintn(b *testing.B, nbits, i int) {
 	bs, _ := NewFromString("0000000000000000000000000000000101000000000000000000000000000000")
 	var v uint64
 	for n := 0; n < b.N; n++ {
-		v = bs.Uintn(nbits, i)
+		v = bs.Uintn(i, nbits)
 	}
 	b.StopTimer()
 	sink = v
@@ -158,7 +158,7 @@ func BenchmarkSetUintn(b *testing.B) {
 	b.ResetTimer()
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		bs.SetUintn(64, 35, 0x9cfbeb71ee3fcf5f&uintsize)
+		bs.SetUintn(35, 64, 0x9cfbeb71ee3fcf5f&uintsize)
 	}
 	b.StopTimer()
 	sink = bs
