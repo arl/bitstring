@@ -6,8 +6,7 @@
 # bitstring
 Go bitstring library
 
-Package `bitstring` implements an fixed-length bit string type and many bit
-string manipulation functions:
+Package `bitstring` implements a fixed-length bit string type and many bit manipulation functions:
  - set/clear/flip a single bit 
  - set/clear/flip a range of bits 
  - swap or compare range of bits between 2 bitstrings
