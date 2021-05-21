@@ -86,7 +86,7 @@ func (bs *Bitstring) Data() []uint64 {
 	return bs.data
 }
 
-// Bit returns a boolean indicating wether the bit at index i is set or not.
+// Bit returns a boolean indicating whether the bit at index i is set or not.
 //
 // If i is greater than the bitstring length, Bit will panic.
 func (bs *Bitstring) Bit(i int) bool {
