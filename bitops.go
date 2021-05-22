@@ -58,3 +58,22 @@ func firstSetBit(w uint64) uint64 {
 	}
 	return num
 }
+
+// if n is a power of 2, ispow2 returns (v, true) such that (1<<v) gives n, or
+// (0, false) if n is not a power of 2.
+//
+// panics if n == 0
+func ispow2(n uint64) (uint64, bool) {
+	if (n & -n) != n {
+		// n is not a power of 2
+		return 0, false
+	}
+
+	for i := uint64(0); i < 64; i++ {
+		if n == 1<<i {
+			return i, true
+		}
+	}
+
+	panic("unreachable")
+}

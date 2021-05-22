@@ -1,7 +1,10 @@
 package bitstring
 
 import (
+	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_lomask(t *testing.T) {
@@ -45,43 +48,57 @@ func Test_himask(t *testing.T) {
 func Test_genmask(t *testing.T) {
 	tests := []struct {
 		l, h uint64
-		want uint64
+		want string
 	}{
-		{l: 0, h: 0, want: atobin("00000000000000000000000000000000")},
-		{l: 0, h: 1, want: atobin("00000000000000000000000000000001")},
-		{l: 0, h: 2, want: atobin("00000000000000000000000000000011")},
-		{l: 1, h: 1, want: atobin("00000000000000000000000000000000")},
-		{l: 1, h: 2, want: atobin("00000000000000000000000000000010")},
-		{l: 0, h: 31, want: atobin("01111111111111111111111111111111")},
-		{l: 1, h: 31, want: atobin("01111111111111111111111111111110")},
-		{l: 0, h: 30, want: atobin("00111111111111111111111111111111")},
+		{l: 0, h: 0, want: "00000000000000000000000000000000"},
+		{l: 0, h: 1, want: "00000000000000000000000000000001"},
+		{l: 0, h: 2, want: "00000000000000000000000000000011"},
+		{l: 1, h: 1, want: "00000000000000000000000000000000"},
+		{l: 1, h: 2, want: "00000000000000000000000000000010"},
+		{l: 0, h: 31, want: "01111111111111111111111111111111"},
+		{l: 1, h: 31, want: "01111111111111111111111111111110"},
+		{l: 0, h: 30, want: "00111111111111111111111111111111"},
 	}
 	for _, tt := range tests {
-		if got := mask(tt.l, tt.h); got != tt.want {
+		if got := mask(tt.l, tt.h); got != atobin(tt.want) {
 			t.Errorf("mask(%d, %d) got %s, want %s", tt.l, tt.h,
-				sprintubits(got, 32), sprintubits(tt.want, 32))
+				sprintubits(got, 32), tt.want)
 		}
 	}
 }
 
-func Test_findFirstSetBit(t *testing.T) {
+func Test_firstSetBit(t *testing.T) {
 	tests := []struct {
-		w    uint64
+		bits string
 		want uint64
 	}{
-		{w: atobin("00000000000000000000000000000001"), want: 0},
-		{w: atobin("00000000000000000000000000000010"), want: 1},
-		{w: atobin("10000000000000000000000000000001"), want: 0},
-		{w: atobin("00000000000001111111000000000100"), want: 2},
-		{w: atobin("00000000000001111111000000000000"), want: 12},
-		{w: atobin("10000000000000000000000000000000"), want: 31},
-		{w: atobin("00000000000000000000000000000000"), want: uintsize - 1},
-		{w: atobin("11111111111111111111111111111111"), want: 0},
+		{bits: "00000000000000000000000000000001", want: 0},
+		{bits: "00000000000000000000000000000010", want: 1},
+		{bits: "10000000000000000000000000000001", want: 0},
+		{bits: "00000000000001111111000000000100", want: 2},
+		{bits: "00000000000001111111000000000000", want: 12},
+		{bits: "10000000000000000000000000000000", want: 31},
+		{bits: "00000000000000000000000000000000", want: uintsize - 1},
+		{bits: "1000000000000000000000000000000000000000000000000000000000000000", want: 63},
+		{bits: "11111111111111111111111111111111", want: 0},
 	}
 	for _, tt := range tests {
-		if got := firstSetBit(tt.w); got != tt.want {
-			t.Errorf("findFirstSetBit(%s) got %d, want %d",
-				sprintubits(tt.w, 32), got, tt.want)
-		}
+		got := firstSetBit(atobin(tt.bits))
+		assert.EqualValuesf(t, tt.want, got, "%q, first bit = %d, want %d", tt.bits, got, tt.want)
+	}
+}
+
+func Test_ispow2(t *testing.T) {
+	for i := uint64(0); i < 64; i++ {
+		t.Run(fmt.Sprintf("1<<%d", i), func(t *testing.T) {
+			n, ok := ispow2(1 << i)
+			assert.Truef(t, ok, "ispow2(1<<%d)", i)
+			assert.Equalf(t, i, n, "ispow2(1<<%d)", i)
+			if i == 0 {
+				return
+			}
+			_, ok = ispow2(1<<i + 1)
+			assert.Falsef(t, ok, "ispow2(1<<%d)", i)
+		})
 	}
 }
