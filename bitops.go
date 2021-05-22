@@ -1,14 +1,14 @@
 package bitstring
 
-// bitmask returns a mask where only the nth bit of a uint is set.
+// bitmask returns a mask where only the nth bit of a word is set.
 func bitmask(n uint64) uint64 { return 1 << n }
 
 // wordoffset returns, for a given bit n of a bit string, the offset
-// of the uint64 that contains bit n.
+// of the word that contains bit n.
 func wordoffset(n uint64) uint64 { return n / 64 }
 
 // bitoffset returns, for a given bit n of a bit string, the offset of that bit
-// with respect to the first bit of the uint64 that contains it.
+// with respect to the first bit of the word that contains it.
 func bitoffset(n uint64) uint64 { return n & (64 - 1) }
 
 // mask returns a mask that keeps the bits in the range [l, h) behavior
@@ -23,7 +23,7 @@ func lomask(n uint64) uint64 { return maxuint >> (64 - n) }
 // behavior if n is greater than uintsize.
 func himask(n uint64) uint64 { return maxuint << n }
 
-// transferbits returns the uint that results from transferring some bits from
+// transferbits returns the word that results from transferring some bits from
 // src to dst, where set bits in mask specify the bits to transfer.
 func transferbits(dst, src, mask uint64) uint64 {
 	return dst&^mask | src&mask
