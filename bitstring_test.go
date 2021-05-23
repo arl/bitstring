@@ -91,15 +91,6 @@ func TestString(t *testing.T) {
 	}
 }
 
-// Checks that integer conversion is correct.
-func TestToNumber(t *testing.T) {
-	bs := New(10)
-
-	bs.SetBit(0)
-	bs.SetBit(9)
-	bint := bs.BigInt()
-	assert.True(t, bint.IsInt64())
-	assert.EqualValues(t, 513, bint.Int64())
 func TestReverse(t *testing.T) {
 	tests := []string{
 		"0000000000000000000000000000000000000000000000000000000000000001",
@@ -210,3 +201,14 @@ func TestEquals(t *testing.T) {
 	bs2.SetBit(8)
 	assert.False(t, bs2.Equals(org))
 }
+
+func TestBig(t *testing.T) {
+	bs := New(10)
+	bs.SetBit(0)
+	bs.SetBit(9)
+
+	bint := bs.BigInt()
+	assert.True(t, bint.IsInt64())
+	assert.EqualValues(t, 513, bint.Int64())
+}
+
