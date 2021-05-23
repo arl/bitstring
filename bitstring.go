@@ -146,6 +146,43 @@ func (bs *Bitstring) ZeroesCount() int {
 	return bs.length - bs.OnesCount()
 }
 
+func alignedRev(data []uint64) {
+	p := unsafe.Pointer((*reflect.SliceHeader)(unsafe.Pointer(&data)).Data)
+
+	var buf []byte
+	hdr := (*reflect.SliceHeader)(unsafe.Pointer(&buf))
+	hdr.Data = uintptr(p)
+	hdr.Len = len(data) * 8
+	hdr.Cap = len(data) * 8
+
+	// NOTE: we don't care about native endianness here since we're performing a
+	// byte-per-byte swap.
+	for i := 0; i < len(buf)/2; i++ {
+		buf[i], buf[len(buf)-i-1] = reverseLut[buf[len(buf)-i-1]], reverseLut[buf[i]]
+	}
+}
+
+// Reverse reverses all bits in-place.
+func (bs *Bitstring) Reverse() {
+	alignedRev(bs.data)
+
+	if bs.length%64 == 0 {
+		// Fast path, word-aligned reversal.
+		return
+	}
+
+	off := bitoffset(uint64(bs.length))
+	shift := 64 - off
+	savemask := lomask(shift)
+	mask := uint64(0)
+
+	for i := len(bs.data) - 1; i >= 0; i-- {
+		save := (bs.data[i] & savemask) << off
+		bs.data[i] >>= shift
+		bs.data[i] |= mask
+		mask = save
+	}
+}
 // BigInt returns the big.Int representation of bs.
 func (bs *Bitstring) BigInt() *big.Int {
 	bi := new(big.Int)

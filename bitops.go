@@ -77,3 +77,10 @@ func ispow2(n uint64) (uint64, bool) {
 
 	panic("unreachable")
 }
+
+func reverseBytes(buf []byte) []byte {
+	for i := 0; i < len(buf)/2; i++ {
+		buf[i], buf[len(buf)-i-1] = buf[len(buf)-i-1], buf[i]
+	}
+	return buf
+}
