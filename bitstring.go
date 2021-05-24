@@ -8,6 +8,8 @@ import (
 	"math/big"
 	"math/bits"
 	"math/rand"
+	"reflect"
+	"unsafe"
 )
 
 // Bitstring implements a fixed-length bit string.
@@ -164,31 +166,43 @@ func alignedRev(data []uint64) {
 
 // Reverse reverses all bits in-place.
 func (bs *Bitstring) Reverse() {
+	// We first reverse the whole bitstring.
 	alignedRev(bs.data)
 
 	if bs.length%64 == 0 {
-		// Fast path, word-aligned reversal.
+		// No need for extra shifting.
 		return
 	}
 
 	off := bitoffset(uint64(bs.length))
 	shift := 64 - off
-	savemask := lomask(shift)
-	mask := uint64(0)
+	mask := lomask(shift)
+	prev := uint64(0) // bits from previous word
 
 	for i := len(bs.data) - 1; i >= 0; i-- {
-		save := (bs.data[i] & savemask) << off
+		save := (bs.data[i] & mask) << off
 		bs.data[i] >>= shift
-		bs.data[i] |= mask
-		mask = save
+		bs.data[i] |= prev
+		prev = save
 	}
 }
+
 // BigInt returns the big.Int representation of bs.
 func (bs *Bitstring) BigInt() *big.Int {
-	bi := new(big.Int)
-	_, _ = bi.SetString(bs.String(), 2)
+	cpy := Clone(bs)
 
-	return bi
+	p := unsafe.Pointer((*reflect.SliceHeader)(unsafe.Pointer(&cpy.data)).Data)
+
+	var words []big.Word
+	hdr := (*reflect.SliceHeader)(unsafe.Pointer(&words))
+	hdr.Data = uintptr(p)
+	hdr.Len = len(cpy.data) * (uintsize / 32)
+	hdr.Cap = hdr.Len
+
+	bint := new(big.Int)
+	bint.SetBits(words)
+
+	return bint
 }
 
 // String returns a string representation of bs in big endian order.
@@ -220,7 +234,6 @@ func Copy(dst, src *Bitstring) {
 	switch {
 	case dst.length == src.length:
 	case dst.length < src.length:
-		// XXX: Reallocate the whole bitstring, but is it really faster?
 		dst.data = make([]uint64, len(src.data))
 		dst.length = src.length
 	case dst.length > src.length:
@@ -255,11 +268,6 @@ func (bs *Bitstring) RotateLeft(k int) {
 
 // RotateRight rotates the bitstring by (k mod len) bits.
 func (bs *Bitstring) RotateRight(k int) {
-	panic("unimplemented")
-}
-
-// Reverse reverses the order of bits in the bitstring.
-func (bs *Bitstring) Reverse(k int) {
 	panic("unimplemented")
 }
 
