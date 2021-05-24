@@ -1,5 +1,12 @@
 package bitstring
 
+import (
+	"encoding/binary"
+	"fmt"
+	"strings"
+	"unsafe"
+)
+
 // bitmask returns a mask where only the nth bit of a word is set.
 func bitmask(n uint64) uint64 { return 1 << n }
 
@@ -59,6 +66,27 @@ func firstSetBit(w uint64) uint64 {
 	return num
 }
 
+func reverseBytes(buf []byte) []byte {
+	for i := 0; i < len(buf)/2; i++ {
+		buf[i], buf[len(buf)-i-1] = buf[len(buf)-i-1], buf[i]
+	}
+	return buf
+}
+
+// shifts all words of n bits to the right. invariant: 0 <= off <= 64.
+func rightShiftBits(words []uint64, n uint64) {
+	shift := 64 - n
+	mask := lomask(n)
+	prev := uint64(0) // bits from previous word
+
+	for i := len(words) - 1; i >= 0; i-- {
+		save := (words[i] & mask) << shift
+		words[i] >>= n
+		words[i] |= prev
+		prev = save
+	}
+}
+
 // if n is a power of 2, ispow2 returns (v, true) such that (1<<v) gives n, or
 // (0, false) if n is not a power of 2.
 //
@@ -78,9 +106,27 @@ func ispow2(n uint64) (uint64, bool) {
 	panic("unreachable")
 }
 
-func reverseBytes(buf []byte) []byte {
-	for i := 0; i < len(buf)/2; i++ {
-		buf[i], buf[len(buf)-i-1] = buf[len(buf)-i-1], buf[i]
+func sprintbuf(b []byte) string {
+	var sb strings.Builder
+	for i := range b {
+		fmt.Fprintf(&sb, "%08b ", b[i])
 	}
-	return buf
+
+	return sb.String()
+}
+
+func printbuf(b []byte) {
+	fmt.Println(sprintbuf(b))
+}
+
+var nativeEndian binary.ByteOrder
+
+func init() {
+	i := uint32(1)
+	b := (*[4]byte)(unsafe.Pointer(&i))
+	if b[0] == 1 {
+		nativeEndian = binary.LittleEndian
+	} else {
+		nativeEndian = binary.BigEndian
+	}
 }

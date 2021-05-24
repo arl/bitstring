@@ -174,17 +174,7 @@ func (bs *Bitstring) Reverse() {
 		return
 	}
 
-	off := bitoffset(uint64(bs.length))
-	shift := 64 - off
-	mask := lomask(shift)
-	prev := uint64(0) // bits from previous word
-
-	for i := len(bs.data) - 1; i >= 0; i-- {
-		save := (bs.data[i] & mask) << off
-		bs.data[i] >>= shift
-		bs.data[i] |= prev
-		prev = save
-	}
+	rightShiftBits(bs.data, bitoffset(uint64(64-bs.length)))
 }
 
 // BigInt returns the big.Int representation of bs.
