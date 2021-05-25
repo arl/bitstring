@@ -23,7 +23,7 @@ func sprintsbits(val int64, nbits int) string {
 }
 
 func atobin(s string) uint64 {
-	i, err := strconv.ParseUint(s, 2, uintsize)
+	i, err := strconv.ParseUint(s, 2, 64)
 	if err != nil {
 		panic(fmt.Sprintf("Can't convert %s to base 2: %s", s, err))
 	}

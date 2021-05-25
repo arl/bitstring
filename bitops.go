@@ -3,9 +3,12 @@ package bitstring
 import (
 	"encoding/binary"
 	"fmt"
+	"math"
 	"strings"
 	"unsafe"
 )
+
+const wordsize = 32 << (^uint(0) >> 63) // 32 or 64
 
 // bitmask returns a mask where only the nth bit of a word is set.
 func bitmask(n uint64) uint64 { return 1 << n }
@@ -23,12 +26,12 @@ func bitoffset(n uint64) uint64 { return n & (64 - 1) }
 func mask(l, h uint64) uint64 { return lomask(h) & himask(l) }
 
 // lomask returns a mask to keep the n LSB (least significant bits). Undefined
-// behavior if n is greater than uintsize.
-func lomask(n uint64) uint64 { return maxuint >> (64 - n) }
+// behavior if n is greater than 64.
+func lomask(n uint64) uint64 { return math.MaxUint64 >> (64 - n) }
 
 // himask returns a mask to keep the n MSB (most significant bits). Undefined
-// behavior if n is greater than uintsize.
-func himask(n uint64) uint64 { return maxuint << n }
+// behavior if n is greater than 64.
+func himask(n uint64) uint64 { return math.MaxUint64 << n }
 
 // transferbits returns the word that results from transferring some bits from
 // src to dst, where set bits in mask specify the bits to transfer.

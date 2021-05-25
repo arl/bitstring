@@ -158,7 +158,7 @@ func BenchmarkSetUintn(b *testing.B) {
 	b.ResetTimer()
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		bs.SetUintn(35, 64, 0x9cfbeb71ee3fcf5f&uintsize)
+		bs.SetUintn(35, 64, 0x9cfbeb71ee3fcf5f&64)
 	}
 	b.StopTimer()
 	sink = bs

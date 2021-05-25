@@ -2,6 +2,7 @@ package bitstring
 
 import (
 	"fmt"
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -15,9 +16,9 @@ func Test_lomask(t *testing.T) {
 		{n: 0, want: atobin("00000000000000000000000000000000")},
 		{n: 1, want: atobin("00000000000000000000000000000001")},
 		{n: 2, want: atobin("00000000000000000000000000000011")},
-		{n: uintsize - 2, want: maxuint >> 2},
-		{n: uintsize - 1, want: maxuint >> 1},
-		{n: uintsize, want: maxuint},
+		{n: 64 - 2, want: math.MaxUint64 >> 2},
+		{n: 64 - 1, want: math.MaxUint64 >> 1},
+		{n: 64, want: math.MaxUint64},
 	}
 	for _, tt := range tests {
 		if got := lomask(tt.n); got != tt.want {
@@ -32,10 +33,10 @@ func Test_himask(t *testing.T) {
 		n    uint64
 		want uint64
 	}{
-		{n: 0, want: maxuint},
-		{n: 1, want: maxuint - 1},
-		{n: uintsize - 2, want: 1<<(uintsize-1) + 1<<(uintsize-2)},
-		{n: uintsize - 1, want: 1 << (uintsize - 1)},
+		{n: 0, want: math.MaxUint64},
+		{n: 1, want: math.MaxUint64 - 1},
+		{n: 64 - 2, want: 1<<(64-1) + 1<<(64-2)},
+		{n: 64 - 1, want: 1 << (64 - 1)},
 	}
 	for _, tt := range tests {
 		if got := himask(tt.n); got != tt.want {
@@ -78,7 +79,7 @@ func Test_firstSetBit(t *testing.T) {
 		{bits: "00000000000001111111000000000100", want: 2},
 		{bits: "00000000000001111111000000000000", want: 12},
 		{bits: "10000000000000000000000000000000", want: 31},
-		{bits: "00000000000000000000000000000000", want: uintsize - 1},
+		{bits: "00000000000000000000000000000000", want: 64 - 1},
 		{bits: "1000000000000000000000000000000000000000000000000000000000000000", want: 63},
 		{bits: "11111111111111111111111111111111", want: 0},
 	}

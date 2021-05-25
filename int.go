@@ -1,7 +1,5 @@
 package bitstring
 
-import "fmt"
-
 /* unsigned integer get */
 
 // Uint8 interprets the 8 bits at offset off as an uint8 in big endian and
@@ -43,15 +41,15 @@ func (bs *Bitstring) Uint64(off int) uint64 {
 	bit := bitoffset(i)
 	loword := bs.data[w] >> bit
 	hiword := bs.data[w+1] & ((1 << bit) - 1)
-	return uint64(loword | hiword<<(uintsize-bit))
+	return uint64(loword | hiword<<(64-bit))
 }
 
 // Uintn interprets the n bits at offset off as an n-bit unsigned integer in big
 // endian and returns its value. Behavior is undefined if there aren't enough
 // bits. Panics if nbits is greater than 64.
 func (bs *Bitstring) Uintn(off, n int) uint64 {
-	if n > uintsize || n < 1 {
-		panic(fmt.Sprintf("Uintn supports unsigned integers from 1 to %d bits long", uintsize))
+	if n > 64 || n < 1 {
+		panic("Uintn supports unsigned integers from 1 to 64 bits long")
 	}
 	bs.mustExist(off + n - 1)
 
@@ -67,14 +65,14 @@ func (bs *Bitstring) Uintn(off, n int) uint64 {
 	hioff := bitoffset(i + nbits)
 	hiword := bs.data[k] & lomask(hioff)
 	loword = himask(looff) & loword >> looff
-	return loword | hiword<<(uintsize-looff)
+	return loword | hiword<<(64-looff)
 }
 
 func (bs *Bitstring) uint(off, n uint64) uint64 {
 	bit := bitoffset(off)
 	loword := bs.data[wordoffset(off)] >> bit
 	hiword := bs.data[wordoffset(off+n)] & ((1 << bit) - 1)
-	return loword | hiword<<(uintsize-bit)
+	return loword | hiword<<(64-bit)
 }
 
 /* unsigned integer set */
@@ -99,7 +97,7 @@ func (bs *Bitstring) SetUint8(off int, val uint8) {
 	// Transfer bits to low word.
 	bs.data[j] = transferbits(bs.data[j], uint64(val)<<lobit, himask(lobit))
 	// Transfer bits to high word.
-	lon := uintsize - lobit
+	lon := 64 - lobit
 	bs.data[k] = transferbits(bs.data[k], uint64(val)>>lon, lomask(8-lon))
 }
 
@@ -122,7 +120,7 @@ func (bs *Bitstring) SetUint16(off int, val uint16) {
 	// Transfer bits to low word.
 	bs.data[j] = transferbits(bs.data[j], uint64(val)<<lobit, himask(lobit))
 	// Transfer bits to high word.
-	lon := uintsize - lobit
+	lon := 64 - lobit
 	bs.data[k] = transferbits(bs.data[k], uint64(val)>>lon, lomask(16-lon))
 }
 
@@ -145,7 +143,7 @@ func (bs *Bitstring) SetUint32(off int, val uint32) {
 	// Transfer bits to low word.
 	bs.data[j] = transferbits(bs.data[j], uint64(val)<<lobit, himask(lobit))
 	// Transfer bits to high word.
-	lon := uintsize - lobit
+	lon := 64 - lobit
 	bs.data[k] = transferbits(bs.data[k], uint64(val)>>lon, lomask(32-lon))
 }
 
@@ -167,7 +165,7 @@ func (bs *Bitstring) SetUint64(off int, val uint64) {
 	// Transfer bits to low word.
 	bs.data[j] = transferbits(bs.data[j], uint64(val)<<lobit, himask(lobit))
 	// Transfer bits to high word.
-	lon := (uintsize - lobit)
+	lon := (64 - lobit)
 	k := wordoffset(i + 63)
 	bs.data[k] = transferbits(bs.data[k], uint64(val)>>lon, lomask(64-lon))
 }
@@ -176,8 +174,8 @@ func (bs *Bitstring) SetUint64(off int, val uint64) {
 // big endian. Behavior is undefined if there aren't enough bits. Panics if
 // nbits is greater than 64.
 func (bs *Bitstring) SetUintn(off, n int, val uint64) {
-	if n > uintsize || n < 1 {
-		panic(fmt.Sprintf("SetUintn supports unsigned integers from 1 to %d bits long", uintsize))
+	if n > 64 || n < 1 {
+		panic("SetUintn supports unsigned integers from 1 to 64 bits long")
 	}
 	bs.mustExist(off + n - 1)
 
@@ -194,7 +192,7 @@ func (bs *Bitstring) SetUintn(off, n int, val uint64) {
 
 	// First and last bits are on different words.
 	// Transfer bits to low word.
-	lon := uintsize - lobit // how many bits of n we transfer to loword
+	lon := 64 - lobit // how many bits of n we transfer to loword
 	bs.data[j] = transferbits(bs.data[j], val<<lobit, himask(lon))
 
 	// Transfer bits to high word.

@@ -1,5 +1,7 @@
 package bitstring
 
+import "math"
+
 func minuint(x, y uint64) uint64 {
 	if x < y {
 		return x
@@ -19,15 +21,15 @@ func SwapRange(bs1, bs2 *Bitstring, off, len int) {
 	start, l := uint64(off), uint64(len)
 	i := wordoffset(start)
 	start = bitoffset(start)
-	end := minuint(start+l, uintsize)
+	end := minuint(start+l, 64)
 	swapBits(bs1, bs2, i, mask(start, end))
 	i++
 
 	// Swap whole words but the last one.
 	remain := l - (end - start)
-	for remain > uintsize {
+	for remain > 64 {
 		bs1.data[i], bs2.data[i] = bs2.data[i], bs1.data[i]
-		remain -= uintsize
+		remain -= 64
 		i++
 	}
 
@@ -61,7 +63,7 @@ func EqualRange(bs1, bs2 *Bitstring, off, len int) bool {
 	start, l := uint64(off), uint64(len)
 	i := wordoffset(start)
 	start = bitoffset(start)
-	end := minuint(start+l, uintsize)
+	end := minuint(start+l, 64)
 	m := mask(start, end)
 	if bs1.data[i]&m != bs2.data[i]&m {
 		return false
@@ -70,7 +72,7 @@ func EqualRange(bs1, bs2 *Bitstring, off, len int) bool {
 
 	// Compare all words but the last one.
 	remain := l - (end - start)
-	j := i + (remain / uintsize)
+	j := i + (remain / 64)
 	if !u64cmp(bs1.data[i:j], bs2.data[i:j]) {
 		return false
 	}
@@ -96,15 +98,15 @@ func (bs *Bitstring) SetRange(off, len int) {
 	start, l := uint64(off), uint64(len)
 	i := wordoffset(start)
 	start = bitoffset(start)
-	end := minuint(start+l, uintsize)
+	end := minuint(start+l, 64)
 	bs.data[i] |= mask(start, end)
 	i++
 
 	// Set bits in all words but the last one.
 	remain := l - (end - start)
-	for remain > uintsize {
-		bs.data[i] = maxuint
-		remain -= uintsize
+	for remain > 64 {
+		bs.data[i] = math.MaxUint64
+		remain -= 64
 		i++
 	}
 
@@ -124,15 +126,15 @@ func (bs *Bitstring) ClearRange(off, len int) {
 	start, l := uint64(off), uint64(len)
 	i := wordoffset(start)
 	start = bitoffset(start)
-	end := minuint(start+l, uintsize)
+	end := minuint(start+l, 64)
 	bs.data[i] &= ^mask(start, end)
 	i++
 
 	// Clear bits in all words but the last one.
 	remain := l - (end - start)
-	for remain > uintsize {
+	for remain > 64 {
 		bs.data[i] = 0
-		remain -= uintsize
+		remain -= 64
 		i++
 	}
 
@@ -152,15 +154,15 @@ func (bs *Bitstring) FlipRange(off, len int) {
 	start, l := uint64(off), uint64(len)
 	i := wordoffset(start)
 	start = bitoffset(start)
-	end := minuint(start+l, uintsize)
+	end := minuint(start+l, 64)
 	bs.data[i] ^= mask(start, end)
 	i++
 
 	// Flip bits in all words but the last one.
 	remain := l - (end - start)
-	for remain > uintsize {
-		bs.data[i] ^= maxuint
-		remain -= uintsize
+	for remain > 64 {
+		bs.data[i] ^= math.MaxUint64
+		remain -= 64
 		i++
 	}
 
@@ -181,16 +183,16 @@ func (bs *Bitstring) CopyRange(off, len int) *Bitstring {
 	start, l := uint64(off), uint64(len)
 	i := wordoffset(start)
 	start = bitoffset(start)
-	end := minuint(start+l, uintsize)
+	end := minuint(start+l, 64)
 	mask := mask(start, end)
 	ret.data[0] = bs.data[i] & mask
 	i++
 
 	// Copy all words but the last one.
 	remain := l - (end - start)
-	j := i + (remain / uintsize)
+	j := i + (remain / 64)
 	n := copy(ret.data[1:], bs.data[i:j])
-	remain -= uint64(n) * uintsize
+	remain -= uint64(n) * 64
 
 	// Copy bits in the last word.
 	if remain != 0 {

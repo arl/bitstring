@@ -265,7 +265,7 @@ func (bs *Bitstring) LeadingZeroes() int {
 		// bits' from the count the count of leading zeroes.
 		if i == start && bitoff != 0 {
 			// Limit to 'off' the number of bits we count.
-			leading -= uintsize - bitoff
+			leading -= 64 - bitoff
 			n += leading
 			if leading != bitoff {
 				break // early exit if useful bits are not all 0s.
@@ -292,7 +292,7 @@ func (bs *Bitstring) TrailingZeroes() int {
 	for i := 0; i < len(bs.data); i++ {
 		trailing := bits.TrailingZeros64(bs.data[i])
 
-		if i == last && bitoff != 0 && trailing == uintsize {
+		if i == last && bitoff != 0 && trailing == 64 {
 			// There's one specific case we need to take care of: if the last
 			// word if 0 and the bitstring length is not a multiple of the
 			// wordsize, then the effective number of trailing bits is not 64,
