@@ -150,7 +150,7 @@ func TestClone(t *testing.T) {
 	bs.SetBit(7)
 	bs.SetBit(8)
 
-	cpy := Clone(bs)
+	cpy := bs.Clone()
 	equalbits(t, cpy, bs)
 }
 
@@ -192,7 +192,7 @@ func TestEquals(t *testing.T) {
 	assert.False(t, org.Equals(nil))
 	assert.False(t, org.Equals(&Bitstring{}))
 
-	clone := Clone(org)
+	clone := org.Clone()
 	assert.Truef(t, clone.Equals(org), "different bitstrings, clone=%s, org=%s", clone, org)
 
 	clone.FlipBit(0)

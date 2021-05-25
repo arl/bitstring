@@ -179,7 +179,7 @@ func (bs *Bitstring) Reverse() {
 
 // BigInt returns the big.Int representation of bs.
 func (bs *Bitstring) BigInt() *big.Int {
-	cpy := Clone(bs)
+	cpy := bs.Clone()
 
 	p := unsafe.Pointer((*reflect.SliceHeader)(unsafe.Pointer(&cpy.data)).Data)
 
@@ -209,11 +209,11 @@ func (bs *Bitstring) String() string {
 }
 
 // Clone creates and returns a new Bitstring that is a clone of src.
-func Clone(src *Bitstring) *Bitstring {
-	dst := make([]uint64, len(src.data))
-	copy(dst, src.data)
+func (bs *Bitstring) Clone() *Bitstring {
+	dst := make([]uint64, len(bs.data))
+	copy(dst, bs.data)
 	return &Bitstring{
-		length: src.length,
+		length: bs.length,
 		data:   dst,
 	}
 }
