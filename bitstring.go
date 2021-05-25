@@ -186,7 +186,7 @@ func (bs *Bitstring) BigInt() *big.Int {
 	var words []big.Word
 	hdr := (*reflect.SliceHeader)(unsafe.Pointer(&words))
 	hdr.Data = uintptr(p)
-	hdr.Len = len(cpy.data) * (uintsize / 32)
+	hdr.Len = len(cpy.data) * (64 / wordsize)
 	hdr.Cap = hdr.Len
 
 	bint := new(big.Int)
