@@ -68,24 +68,54 @@ func Test_genmask(t *testing.T) {
 	}
 }
 
-func Test_firstSetBit(t *testing.T) {
+func Test_lsb(t *testing.T) {
 	tests := []struct {
 		bits string
 		want uint64
 	}{
-		{bits: "00000000000000000000000000000001", want: 0},
-		{bits: "00000000000000000000000000000010", want: 1},
-		{bits: "10000000000000000000000000000001", want: 0},
-		{bits: "00000000000001111111000000000100", want: 2},
-		{bits: "00000000000001111111000000000000", want: 12},
+		{bits: "11000010000000000000000000000001", want: 0}, // ok
+		{bits: "01000001000000000000000000000010", want: 1},
+		{bits: "10000000000100000000000000000001", want: 0},
+		{bits: "00000000010001111111000000000100", want: 2}, // ok
+		{bits: "00000001000001111111000000000000", want: 12},
 		{bits: "10000000000000000000000000000000", want: 31},
-		{bits: "00000000000000000000000000000000", want: 64 - 1},
 		{bits: "1000000000000000000000000000000000000000000000000000000000000000", want: 63},
 		{bits: "11111111111111111111111111111111", want: 0},
 	}
 	for _, tt := range tests {
-		got := firstSetBit(atobin(tt.bits))
-		assert.EqualValuesf(t, tt.want, got, "%q, first bit = %d, want %d", tt.bits, got, tt.want)
+		t.Run("", func(t *testing.T) {
+			got := lsb(atobin(tt.bits))
+			if tt.want != got {
+				t.Errorf("lsb(%v) = %d, want %d", tt.bits, got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_msb(t *testing.T) {
+	tests := []struct {
+		bits string
+		want uint64
+	}{
+		{bits: "1100001000000000000000000000000100000000000000000000000000000000", want: 63},
+		{bits: "01", want: 0},
+		{bits: "10", want: 1},
+		{bits: "10000000000100000000000000000001", want: 31},
+		{bits: "110000000000100000000000000000001", want: 32},
+		{bits: "00000000010001111111000000000100", want: 22},
+		{bits: "00000001000001111111000000000000", want: 24},
+		{bits: "01000000000000000000000000000000", want: 30},
+		{bits: "1000000000000000000000000000000000000000000000000000000000000000", want: 63},
+		{bits: "0100000000000000000000000000000000000000000000000000000000000000", want: 62},
+		{bits: "1111111111111111111111111111111111111111111111111111111111111111", want: 63},
+	}
+	for _, tt := range tests {
+		t.Run("", func(t *testing.T) {
+			got := msb(atobin(tt.bits))
+			if tt.want != got {
+				t.Errorf("msb(%v) = %d, want %d", tt.bits, got, tt.want)
+			}
+		})
 	}
 }
 

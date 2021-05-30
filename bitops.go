@@ -1,10 +1,7 @@
 package bitstring
 
 import (
-	"encoding/binary"
-	"fmt"
 	"math"
-	"strings"
 	"unsafe"
 )
 
@@ -39,34 +36,88 @@ func transferbits(dst, src, mask uint64) uint64 {
 	return dst&^mask | src&mask
 }
 
-// firstSetBit returns the offset of the first set bit in w
-func firstSetBit(w uint64) uint64 {
+// lsb returns the offset of the lowest significant set bit in v. That is, the
+// index of the rightmost 1.
+//
+// Note: lsb(0) is meaningless, it's the caller responsibility to not use the
+// result of lsb(0).
+func lsb(v uint64) uint64 {
 	var num uint64
 
-	if (w & 0xffffffff) == 0 {
+	if (v & 0xffffffff) == 0 {
 		num += 32
-		w >>= 32
+		v >>= 32
 	}
-	if (w & 0xffff) == 0 {
+	if (v & 0xffff) == 0 {
 		num += 16
-		w >>= 16
+		v >>= 16
 	}
-	if (w & 0xff) == 0 {
+	if (v & 0xff) == 0 {
 		num += 8
-		w >>= 8
+		v >>= 8
 	}
-	if (w & 0xf) == 0 {
+	if (v & 0xf) == 0 {
 		num += 4
-		w >>= 4
+		v >>= 4
 	}
-	if (w & 0x3) == 0 {
+	if (v & 0x3) == 0 {
 		num += 2
-		w >>= 2
+		v >>= 2
 	}
-	if (w & 0x1) == 0 {
+	if (v & 0x1) == 0 {
 		num++
 	}
 	return num
+}
+
+// msb returns the offset of the most significant set bit in v. That is, the
+// index of the leftmost 1.
+//
+// Note: msb(0) is meaningless, it's the caller responsibility to not use the
+// result of msb(0).
+func msb(v uint64) uint64 {
+	var num uint64
+
+	if (v & 0xffffffff00000000) != 0 {
+		num += 32
+		v >>= 32
+	}
+	if (v & 0xffff0000) != 0 {
+		num += 16
+		v >>= 16
+	}
+	if (v & 0xff00) != 0 {
+		num += 8
+		v >>= 8
+	}
+	if (v & 0xf0) != 0 {
+		num += 4
+		v >>= 4
+	}
+	if (v & 0xc) != 0 {
+		num += 2
+		v >>= 2
+	}
+	if (v & 0x2) != 0 {
+		num++
+		v >>= 1
+	}
+
+	return num
+}
+
+// fastmsbLittleEndian is faster version of msb that only works on little endian
+// architectures. About 50% faster than msb on amd64. Rely on the fact that Go
+// uses IEEE 754 floating point representation. Converts v to float64, then
+// extracts the exponent bits of the IEEE754 representation.
+func fastmsbLittleEndian(v uint64) uint64 {
+	if v == math.MaxUint64 {
+		return 63
+	}
+
+	f := float64(v)
+	arr := *(*[2]uint32)(unsafe.Pointer(&f))
+	return uint64(arr[1]>>20 - 1023)
 }
 
 func reverseBytes(buf []byte) []byte {
