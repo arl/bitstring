@@ -3,20 +3,36 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/arl/bitstring)](https://goreportcard.com/report/github.com/arl/bitstring)
 [![codecov](https://codecov.io/gh/arl/bitstring/branch/main/graph/badge.svg)](https://codecov.io/gh/arl/bitstring)
 
-# bitstring
+# `bitstring`
+
 Go bitstring library
 
-Package `bitstring` implements a fixed-length bit string type and many bit manipulation functions:
- - set/clear/flip a single bit 
- - set/clear/flip a range of bits 
- - swap or compare range of bits between 2 bitstrings
- - 8/16/32/64/n signed/unsigned to/from conversions
- - count ones/zeroes
- - gray code conversion methods
- - convert to `big.Int`
- - Copy/Clone methods
+Package `bitstring` implements a fixed length bit string type and bit manipulation functions.
 
-TODO:
- - RotateLeft/Right
+ - Get/Set/Clear/Flip a single bit: `Bit`|`SetBit`|`ClearBit`|`FlipBit`
+ - Set/Clear/Flip a range of bits: `SetRange`|`ClearRange`|`FlipRange`
+ - Compare 2 bit strings: `Equals` or `EqualsRange`
+ - 8/16/32/64/N signed/unsigned to/from conversions:
+   - `Uint8`|`Uint16`|`Uint32`|`Uint64`|`Uintn`
+   - `SetUint8`|`SetUint16`|`SetUint32`|`SetUint64`|`SetUintn`
+ - Count ones/zeroes: `ZeroesCount`|`OnesCount`
+ - Gray code conversion methods: `Gray8`|`Gray16`|`Gray32`|`Gray64`|`Grayn`
+ - Convert to/from `big.Int`: `BigInt` | `NewFromBig`
+ - Copy/Clone methods: `Copy`|`Clone`|`CopyRange`
+
+
+# Debug version
+
+By default, bit offsets arguments to `bitstring` methods are not checked. This
+allows not to pay the performance penalty of always checking offsets, in
+environments where they are constants or always known beforehand.
+
+You can enable runtime checks by passing the `bitstring_debug` build tag to `go`
+when building the `bitstring` package.
+
+**TODO**:
+ - RotateLeft/Right ShiftLeft/Right
  - Trailing/Leading zeroes/ones
- - improve documentation
+ - Or, And, Xor between bitstrings
+ - Reverse
+ - Run CI on big|little endian and 32|64 bits (for now only amd64) (see https://github.com/docker/setup-qemu-action)

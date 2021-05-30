@@ -1,5 +1,6 @@
-// Package bitstring implements a fixed length bit string type and bit string
-// manipulation functions
+// Package bitstring implements a fixed length bit string type and bit
+// manipulation functions.
+
 package bitstring
 
 import (
@@ -7,6 +8,8 @@ import (
 	"math/big"
 	"math/bits"
 	"math/rand"
+	"reflect"
+	"unsafe"
 )
 
 // Bitstring implements a fixed-length bit string.
@@ -86,7 +89,7 @@ func (bs *Bitstring) Data() []uint64 {
 	return bs.data
 }
 
-// Bit returns a boolean indicating wether the bit at index i is set or not.
+// Bit returns a boolean indicating whether the bit at index i is set or not.
 //
 // If i is greater than the bitstring length, Bit will panic.
 func (bs *Bitstring) Bit(i int) bool {
@@ -145,13 +148,82 @@ func (bs *Bitstring) ZeroesCount() int {
 	return bs.length - bs.OnesCount()
 }
 
+func alignedRev(data []uint64) {
+	p := unsafe.Pointer((*reflect.SliceHeader)(unsafe.Pointer(&data)).Data)
+
+	var buf []byte
+	hdr := (*reflect.SliceHeader)(unsafe.Pointer(&buf))
+	hdr.Data = uintptr(p)
+	hdr.Len = len(data) * 8
+	hdr.Cap = len(data) * 8
+
+	// NOTE: we don't care about native endianness here since we're performing a
+	// byte-per-byte swap.
+	for i := 0; i < len(buf)/2; i++ {
+		buf[i], buf[len(buf)-i-1] = reverseLut[buf[len(buf)-i-1]], reverseLut[buf[i]]
+	}
+}
+
+// Reverse reverses all bits in-place.
+func (bs *Bitstring) Reverse() {
+	// We first reverse the whole bitstring.
+	alignedRev(bs.data)
+
+	if bs.length%64 == 0 {
+		// No need for extra shifting.
+		return
+	}
+
+	rightShiftBits(bs.data, bitoffset(uint64(64-bs.length)))
+}
+
+// NewFromBig creates a new Bitstring using the absolute value of the big.Int
+// bi.
+//
+// The number of bits of the new Bitstring depends on the number of significant
+// bits in the binary representation of bi.
+func NewFromBig(bi *big.Int) *Bitstring {
+	words := bi.Bits()
+
+	p := unsafe.Pointer((*reflect.SliceHeader)(unsafe.Pointer(&words)).Data)
+
+	var bigData []uint64
+	hdr := (*reflect.SliceHeader)(unsafe.Pointer(&bigData))
+	hdr.Data = uintptr(p)
+	hdr.Len = len(words)
+	hdr.Cap = hdr.Len
+
+	datalen := bi.BitLen() / 64
+	if bi.BitLen()%64 != 0 {
+		datalen++
+	}
+
+	bs := &Bitstring{
+		length: bi.BitLen(),
+		data:   make([]uint64, datalen),
+	}
+
+	copy(bs.data, bigData)
+
+	return bs
+}
+
 // BigInt returns the big.Int representation of bs.
 func (bs *Bitstring) BigInt() *big.Int {
-	bi := new(big.Int)
-	if _, ok := bi.SetString(bs.String(), 2); !ok {
-		panic(fmt.Sprintf("couldn't convert bit string \"%s\" to big.Int", bs.String()))
-	}
-	return bi
+	cpy := bs.Clone()
+
+	p := unsafe.Pointer((*reflect.SliceHeader)(unsafe.Pointer(&cpy.data)).Data)
+
+	var words []big.Word
+	hdr := (*reflect.SliceHeader)(unsafe.Pointer(&words))
+	hdr.Data = uintptr(p)
+	hdr.Len = len(cpy.data) * (64 / wordsize)
+	hdr.Cap = hdr.Len
+
+	bint := new(big.Int)
+	bint.SetBits(words)
+
+	return bint
 }
 
 // String returns a string representation of bs in big endian order.
@@ -168,11 +240,11 @@ func (bs *Bitstring) String() string {
 }
 
 // Clone creates and returns a new Bitstring that is a clone of src.
-func Clone(src *Bitstring) *Bitstring {
-	dst := make([]uint64, len(src.data))
-	copy(dst, src.data)
+func (bs *Bitstring) Clone() *Bitstring {
+	dst := make([]uint64, len(bs.data))
+	copy(dst, bs.data)
 	return &Bitstring{
-		length: src.length,
+		length: bs.length,
 		data:   dst,
 	}
 }
@@ -183,7 +255,6 @@ func Copy(dst, src *Bitstring) {
 	switch {
 	case dst.length == src.length:
 	case dst.length < src.length:
-		// XXX: Reallocate the whole bitstring, but is it really faster?
 		dst.data = make([]uint64, len(src.data))
 		dst.length = src.length
 	case dst.length > src.length:
@@ -205,15 +276,68 @@ func (bs *Bitstring) Equals(other *Bitstring) bool {
 		bs == nil && other != nil:
 		return false
 	case bs.length == other.length:
-		od := other.data[:len(bs.data)] // remove BCE
-		for i, v := range bs.data {
-			if v != od[i] {
-				return false
-			}
-		}
-		return true
+		return u64cmp(bs.data, other.data)
 	}
 	return false
+}
+
+// LeadingZeroes returns the number of leading 0 bits in bs. (i.e the number of
+// zeroes in the leftmost side of the string representation).
+func (bs *Bitstring) LeadingZeroes() int {
+	bitoff := int(bitoffset(uint64(bs.length)))
+	start := len(bs.data) - 1
+
+	n := 0
+	for i := start; i >= 0; i-- {
+		leading := bits.LeadingZeros64(bs.data[i])
+
+		// We treat the first word separately if the bistring length is not a
+		// multiple of the wordsize because in this case we must omit the 'extra
+		// bits' from the count the count of leading zeroes.
+		if i == start && bitoff != 0 {
+			// Limit to 'off' the number of bits we count.
+			leading -= 64 - bitoff
+			n += leading
+			if leading != bitoff {
+				break // early exit if useful bits are not all 0s.
+			}
+		} else {
+			// Subsequent words
+			n += leading
+			if leading != 64 {
+				break
+			}
+		}
+	}
+
+	return n
+}
+
+// TrailingZeroes returns the number of leading 0 bits in bs. (i.e the number of
+// zeroes in the rightmost side of the string representation).
+func (bs *Bitstring) TrailingZeroes() int {
+	bitoff := int(bitoffset(uint64(bs.length)))
+	last := len(bs.data) - 1
+
+	n := 0
+	for i := 0; i < len(bs.data); i++ {
+		trailing := bits.TrailingZeros64(bs.data[i])
+
+		if i == last && bitoff != 0 && trailing == 64 {
+			// There's one specific case we need to take care of: if the last
+			// word if 0 and the bitstring length is not a multiple of the
+			// wordsize, then the effective number of trailing bits is not 64,
+			// we need to limit it to the number of useful bits only.
+			trailing = bitoff
+		}
+
+		n += trailing
+		if trailing != 64 {
+			break
+		}
+	}
+
+	return n
 }
 
 /*
@@ -224,21 +348,6 @@ func (bs *Bitstring) RotateLeft(k int) {
 
 // RotateRight rotates the bitstring by (k mod len) bits.
 func (bs *Bitstring) RotateRight(k int) {
-	panic("unimplemented")
-}
-
-// Reverse reverses the order of bits in the bitstring.
-func (bs *Bitstring) Reverse(k int) {
-	panic("unimplemented")
-}
-
-// LeadingZeros returns the number of leading zero bits in the bitstring.
-func (bs *Bitstring) LeadingZeros() int {
-	panic("unimplemented")
-}
-
-// TrailingZeros returns the number of trailing zero bits in the bitstring.
-func (bs *Bitstring) TrailingZeros() int {
 	panic("unimplemented")
 }
 */
