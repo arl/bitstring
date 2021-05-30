@@ -177,6 +177,37 @@ func (bs *Bitstring) Reverse() {
 	rightShiftBits(bs.data, bitoffset(uint64(64-bs.length)))
 }
 
+// NewFromBig creates a new Bitstring using the absolute value of the big.Int
+// bi.
+//
+// The number of bits of the new Bitstring depends on the number of significant
+// bits in the binary representation of bi.
+func NewFromBig(bi *big.Int) *Bitstring {
+	words := bi.Bits()
+
+	p := unsafe.Pointer((*reflect.SliceHeader)(unsafe.Pointer(&words)).Data)
+
+	var bigData []uint64
+	hdr := (*reflect.SliceHeader)(unsafe.Pointer(&bigData))
+	hdr.Data = uintptr(p)
+	hdr.Len = len(words)
+	hdr.Cap = hdr.Len
+
+	datalen := bi.BitLen() / 64
+	if bi.BitLen()%64 != 0 {
+		datalen++
+	}
+
+	bs := &Bitstring{
+		length: bi.BitLen(),
+		data:   make([]uint64, datalen),
+	}
+
+	copy(bs.data, bigData)
+
+	return bs
+}
+
 // BigInt returns the big.Int representation of bs.
 func (bs *Bitstring) BigInt() *big.Int {
 	cpy := bs.Clone()
@@ -317,16 +348,6 @@ func (bs *Bitstring) RotateLeft(k int) {
 
 // RotateRight rotates the bitstring by (k mod len) bits.
 func (bs *Bitstring) RotateRight(k int) {
-	panic("unimplemented")
-}
-
-// LeadingZeros returns the number of leading zero bits in the bitstring.
-func (bs *Bitstring) LeadingZeros() int {
-	panic("unimplemented")
-}
-
-// TrailingZeros returns the number of trailing zero bits in the bitstring.
-func (bs *Bitstring) TrailingZeros() int {
 	panic("unimplemented")
 }
 */
