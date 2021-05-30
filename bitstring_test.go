@@ -246,179 +246,220 @@ func TestBig(t *testing.T) {
 	}
 }
 
-func TestLeadingTrailingZeroes(t *testing.T) {
+func TestLeadingTrailingZeroesOnes(t *testing.T) {
 	tests := []struct {
-		name              string
-		s                 string
-		leading, trailing int
+		name                          string
+		s                             string
+		leadingZeroes, trailingZeroes int
+		leadingOnes, trailingOnes     int
 	}{
 		{
-			name:     "less than 64 bits",
-			s:        "0",
-			leading:  1,
-			trailing: 1,
+			name:          "less than 64 bits",
+			s:             "0",
+			leadingZeroes: 1, trailingZeroes: 1,
+			leadingOnes: 0, trailingOnes: 0,
 		},
 		{
-			name:     "less than 64 bits",
-			s:        "1",
-			leading:  0,
-			trailing: 0,
+			name:          "less than 64 bits",
+			s:             "1",
+			leadingZeroes: 0, trailingZeroes: 0,
+			leadingOnes: 1, trailingOnes: 1,
 		},
 		{
-			name:     "less than 64 bits",
-			s:        "10",
-			leading:  0,
-			trailing: 1,
+			name:          "less than 64 bits",
+			s:             "10",
+			leadingZeroes: 0, trailingZeroes: 1,
+			leadingOnes: 1, trailingOnes: 0,
 		},
 		{
-			name:     "less than 64 bits",
-			s:        "01",
-			leading:  1,
-			trailing: 0,
+			name:          "less than 64 bits",
+			s:             "01",
+			leadingZeroes: 1, trailingZeroes: 0,
+			leadingOnes: 0, trailingOnes: 1,
 		},
 		{
-			name:     "less than 64 bits",
-			s:        "00",
-			leading:  2,
-			trailing: 2,
+			name:          "less than 64 bits",
+			s:             "00",
+			leadingZeroes: 2, trailingZeroes: 2,
+			leadingOnes: 0, trailingOnes: 0,
 		},
 		{
-			name:     "less than 64 bits",
-			s:        "11",
-			leading:  0,
-			trailing: 0,
+			name:          "less than 64 bits",
+			s:             "11",
+			leadingZeroes: 0, trailingZeroes: 0,
+			leadingOnes: 2, trailingOnes: 2,
 		},
 		{
-			name:     "exactly 64 bits",
-			s:        "1111111111111111111111111111111111111111111111111111111111111111",
-			leading:  0,
-			trailing: 0,
+			name:          "exactly 64 bits",
+			s:             "1111111111111111111111111111111111111111111111111111111111111111",
+			leadingZeroes: 0, trailingZeroes: 0,
+			leadingOnes: 64, trailingOnes: 64,
 		},
 		{
-			name:     "exactly 64 bits",
-			s:        "0111111111111111111111111111111111111111111111111111111111111111",
-			leading:  1,
-			trailing: 0,
+			name:          "exactly 64 bits",
+			s:             "0111111111111111111111111111111111111111111111111111111111111111",
+			leadingZeroes: 1, trailingZeroes: 0,
+			leadingOnes: 0, trailingOnes: 63,
 		},
 		{
-			name:     "exactly 64 bits",
-			s:        "1111111111111111111111111111111111111111111111111111111111111110",
-			leading:  0,
-			trailing: 1,
+			name:          "exactly 64 bits",
+			s:             "1111111111111111111111111111111111111111111111111111111111111110",
+			leadingZeroes: 0, trailingZeroes: 1,
+			leadingOnes: 63, trailingOnes: 0,
 		},
 		{
-			name:     "exactly 64 bits",
-			s:        "1111111111111111111111111111111111111111111111111111111111111111",
-			leading:  0,
-			trailing: 0,
+			name:          "exactly 64 bits",
+			s:             "1111111111111111111111111111111111111111111111111111111111111111",
+			leadingZeroes: 0, trailingZeroes: 0,
+			leadingOnes: 64, trailingOnes: 64,
 		},
 		{
-			name:     "exactly 64 bits",
-			s:        "0000000000000000000000000000000000000000000000000000000000000000",
-			leading:  64,
-			trailing: 64,
+			name:          "exactly 64 bits",
+			s:             "0000000000000000000000000000000000000000000000000000000000000000",
+			leadingZeroes: 64, trailingZeroes: 64,
+			leadingOnes: 0, trailingOnes: 0,
 		},
 		{
-			name:     "128 bits",
-			s:        "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
-			leading:  0,
-			trailing: 0,
+			name:          "128 bits",
+			s:             "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			leadingZeroes: 0, trailingZeroes: 0,
+			leadingOnes: 128, trailingOnes: 128,
 		},
 		{
-			name:     "128 bits",
-			s:        "01111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
-			leading:  1,
-			trailing: 0,
+			name:          "128 bits",
+			s:             "01111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			leadingZeroes: 1, trailingZeroes: 0,
+			leadingOnes: 0, trailingOnes: 127,
 		},
 		{
-			name:     "128 bits",
-			s:        "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111110",
-			leading:  0,
-			trailing: 1,
+			name:          "128 bits",
+			s:             "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111110",
+			leadingZeroes: 0, trailingZeroes: 1,
+			leadingOnes: 127, trailingOnes: 0,
 		},
 		{
-			name:     "128 bits",
-			s:        "00000000000000000000000000000000000000000000000000000000000000001111111111111111111111111111111111111111111111111111111111111111",
-			leading:  64,
-			trailing: 0,
+			name:          "128 bits",
+			s:             "00000000000000000000000000000000000000000000000000000000000000001111111111111111111111111111111111111111111111111111111111111111",
+			leadingZeroes: 64, trailingZeroes: 0,
+			leadingOnes: 0, trailingOnes: 64,
 		},
 		{
-			name:     "128 bits",
-			s:        "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
-			leading:  0,
-			trailing: 0,
+			name:          "128 bits",
+			s:             "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			leadingZeroes: 0, trailingZeroes: 0,
+			leadingOnes: 128, trailingOnes: 128,
 		},
 		{
-			name:     "128 bits",
-			s:        "00000000000000000000000000000000000000000000000000000000000000001111111111111111111111111111111111111111111111111111111111111111",
-			leading:  64,
-			trailing: 0,
+			name:          "128 bits",
+			s:             "00000000000000000000000000000000000000000000000000000000000000001111111111111111111111111111111111111111111111111111111111111111",
+			leadingZeroes: 64, trailingZeroes: 0,
+			leadingOnes: 0, trailingOnes: 64,
 		},
 		{
-			name:     "128 bits",
-			s:        "11111111111111111111111111111111111111111111111111111111111111110000000000000000000000000000000000000000000000000000000000000000",
-			leading:  0,
-			trailing: 64,
+			name:          "128 bits",
+			s:             "11111111111111111111111111111111111111111111111111111111111111110000000000000000000000000000000000000000000000000000000000000000",
+			leadingZeroes: 0, trailingZeroes: 64,
+			leadingOnes: 64, trailingOnes: 0,
 		},
 
 		{
-			name:     "129 bits",
-			s:        "111111111111111111111111111111111111111111111111111111111111111100000000000000000000000000000000000000000000000000000000000000000",
-			leading:  0,
-			trailing: 65,
+			name:          "129 bits",
+			s:             "111111111111111111111111111111111111111111111111111111111111111100000000000000000000000000000000000000000000000000000000000000000",
+			leadingZeroes: 0, trailingZeroes: 65,
+			leadingOnes: 64, trailingOnes: 0,
 		},
 		{
-			name:     "129 bits",
-			s:        "000000000000000000000000000000000000000000000000000000000000000001111111111111111111111111111111111111111111111111111111111111111",
-			leading:  65,
-			trailing: 0,
+			name:          "129 bits",
+			s:             "000000000000000000000000000000000000000000000000000000000000000001111111111111111111111111111111111111111111111111111111111111111",
+			leadingZeroes: 65, trailingZeroes: 0,
+			leadingOnes: 0, trailingOnes: 64,
 		},
 		{
-			name:     "129 bits",
-			s:        "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000111000",
-			leading:  123,
-			trailing: 3,
+			name:          "129 bits",
+			s:             "000000000000000000000000000000000000000000000000000000000000000011111111111111111111111111111111111111111111111111111111111111111",
+			leadingZeroes: 64, trailingZeroes: 0,
+			leadingOnes: 0, trailingOnes: 65,
 		},
 		{
-			name:     "129 bits",
-			s:        "000111000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-			leading:  3,
-			trailing: 123,
+			name:          "129 bits",
+			s:             "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000111000",
+			leadingZeroes: 123, trailingZeroes: 3,
+			leadingOnes: 0, trailingOnes: 0,
 		},
 		{
-			name:     "129 bits",
-			s:        "111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
-			leading:  0,
-			trailing: 0,
+			name:          "129 bits",
+			s:             "111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111000111",
+			leadingZeroes: 0, trailingZeroes: 0,
+			leadingOnes: 123, trailingOnes: 3,
 		},
 		{
-			name:     "259 bits",
-			s:        "0010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-			leading:  2,
-			trailing: 136,
+			name:          "129 bits",
+			s:             "000111000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+			leadingZeroes: 3, trailingZeroes: 123,
+			leadingOnes: 0, trailingOnes: 0,
+		},
+		{
+			name:          "129 bits",
+			s:             "111000111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			leadingZeroes: 0, trailingZeroes: 0,
+			leadingOnes: 3, trailingOnes: 123,
+		},
+		{
+			name:          "129 bits",
+			s:             "111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			leadingZeroes: 0, trailingZeroes: 0,
+			leadingOnes: 129, trailingOnes: 129,
+		},
+		{
+			name:          "259 bits",
+			s:             "0010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+			leadingZeroes: 2, trailingZeroes: 136,
+			leadingOnes: 0, trailingOnes: 0,
+		},
+		{
+			name:          "259 bits",
+			s:             "1101111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111101111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			leadingZeroes: 0, trailingZeroes: 0,
+			leadingOnes: 2, trailingOnes: 136,
 		},
 	}
 
 	for _, tt := range tests {
 		bs, _ := NewFromString(tt.s)
 		t.Run(tt.name, func(t *testing.T) {
-			if got := bs.LeadingZeroes(); got != tt.leading {
-				t.Errorf("%q leading zeroes = %d, want %d", tt.s, got, tt.leading)
+			if got := bs.LeadingZeroes(); got != tt.leadingZeroes {
+				t.Errorf("%q leading zeroes = %d, want %d", tt.s, got, tt.leadingZeroes)
 			}
 
-			if got := bs.TrailingZeroes(); got != tt.trailing {
-				t.Errorf("%q leading zeroes = %d, want %d", tt.s, got, tt.trailing)
+			if got := bs.TrailingZeroes(); got != tt.trailingZeroes {
+				t.Errorf("%q trailing zeroes = %d, want %d", tt.s, got, tt.trailingZeroes)
+			}
+
+			if got := bs.LeadingOnes(); got != tt.leadingOnes {
+				t.Errorf("%q leading ones = %d, want %d", tt.s, got, tt.leadingOnes)
+			}
+
+			if got := bs.TrailingOnes(); got != tt.trailingOnes {
+				t.Errorf("%q trailing ones = %d, want %d", tt.s, got, tt.trailingOnes)
 			}
 
 			// After reversing the bit string, leading and trailing zeroes must be swapped.
 			bs.Reverse()
 
-			if got := bs.LeadingZeroes(); got != tt.trailing {
-				t.Errorf("reversed %q leading zeroes = %d, want %d", tt.s, got, tt.trailing)
+			if got := bs.LeadingZeroes(); got != tt.trailingZeroes {
+				t.Errorf("reversed %q leading zeroes = %d, want %d", tt.s, got, tt.trailingZeroes)
 			}
 
-			if got := bs.TrailingZeroes(); got != tt.leading {
-				t.Errorf("reversed  %q leading zeroes = %d, want %d", tt.s, got, tt.leading)
+			if got := bs.TrailingZeroes(); got != tt.leadingZeroes {
+				t.Errorf("reversed  %q trailing zeroes = %d, want %d", tt.s, got, tt.leadingZeroes)
+			}
+
+			if got := bs.LeadingOnes(); got != tt.trailingOnes {
+				t.Errorf("reversed %q leading ones = %d, want %d", tt.s, got, tt.trailingOnes)
+			}
+
+			if got := bs.TrailingOnes(); got != tt.leadingOnes {
+				t.Errorf("reversed  %q trailing ones = %d, want %d", tt.s, got, tt.leadingOnes)
 			}
 		})
 	}

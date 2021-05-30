@@ -19,10 +19,10 @@ Package `bitstring` implements a fixed length bit string type and bit manipulati
  - Gray code conversion methods: `Gray8`|`Gray16`|`Gray32`|`Gray64`|`Grayn`
  - Convert to/from `big.Int`: `BigInt` | `NewFromBig`
  - Copy/Clone methods: `Copy`|`Clone`|`CopyRange`
- - Trailing/LeadingZeroes : `TrailingZeroes`|`LeadingZeroes`
+ - Trailing/Leading Zeroes/Ones : `TrailingZeroes`|`LeadingZeroes`|`TrailingOnes`|`LeadingOnes`
 
 
-# Debug version
+## Debug version
 
 By default, bit offsets arguments to `bitstring` methods are not checked. This
 allows not to pay the performance penalty of always checking offsets, in
@@ -33,7 +33,6 @@ when building the `bitstring` package.
 
 **TODO**:
  - RotateLeft/Right ShiftLeft/Right
- - Trailing/Leading ones
  - Or, And, Xor between bitstrings
  - Reverse
  - Run CI on big|little endian and 32|64 bits (for now only amd64) (see https://github.com/docker/setup-qemu-action)
