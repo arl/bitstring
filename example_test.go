@@ -1,6 +1,9 @@
 package bitstring
 
-import "fmt"
+import (
+	"fmt"
+	"math/big"
+)
 
 func ExampleNew() {
 	bs := New(32)
@@ -61,6 +64,16 @@ func ExampleBitstring_OnesCount() {
 
 	fmt.Println(bs.OnesCount())
 	// Output: 1
+}
+
+func ExampleNewFromBig() {
+	var bi big.Int
+	bi.SetString("11110000111100001111000011110000", 2)
+
+	bs := NewFromBig(&bi)
+
+	fmt.Println(bs)
+	// Output: 11110000111100001111000011110000
 }
 
 func ExampleBitstring_BigInt() {

@@ -17,7 +17,7 @@ Package `bitstring` implements a fixed length bit string type and bit manipulati
    - `SetUint8`|`SetUint16`|`SetUint32`|`SetUint64`|`SetUintn`
  - Count ones/zeroes: `ZeroesCount`|`OnesCount`
  - Gray code conversion methods: `Gray8`|`Gray16`|`Gray32`|`Gray64`|`Grayn`
- - Convert to `big.Int`: `BigInt`
+ - Convert to/from `big.Int`: `BigInt` | `NewFromBig`
  - Copy/Clone methods: `Copy`|`Clone`|`CopyRange`
 
 
@@ -31,6 +31,8 @@ You can enable runtime checks by passing the `bitstring_debug` build tag to `go`
 when building the `bitstring` package.
 
 **TODO**:
- - RotateLeft/Right
+ - RotateLeft/Right ShiftLeft/Right
  - Trailing/Leading zeroes/ones
- - Or, And, Xor,etc between bitstrings
+ - Or, And, Xor between bitstrings
+ - Reverse
+ - Run CI on big|little endian and 32|64 bits (for now only amd64) (see https://github.com/docker/setup-qemu-action)
