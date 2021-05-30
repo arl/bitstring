@@ -108,28 +108,3 @@ func ispow2(n uint64) (uint64, bool) {
 
 	panic("unreachable")
 }
-
-func sprintbuf(b []byte) string {
-	var sb strings.Builder
-	for i := range b {
-		fmt.Fprintf(&sb, "%08b ", b[i])
-	}
-
-	return sb.String()
-}
-
-func printbuf(b []byte) {
-	fmt.Println(sprintbuf(b))
-}
-
-var nativeEndian binary.ByteOrder
-
-func init() {
-	i := uint32(1)
-	b := (*[4]byte)(unsafe.Pointer(&i))
-	if b[0] == 1 {
-		nativeEndian = binary.LittleEndian
-	} else {
-		nativeEndian = binary.BigEndian
-	}
-}
