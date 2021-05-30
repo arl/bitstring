@@ -19,6 +19,7 @@ Package `bitstring` implements a fixed length bit string type and bit manipulati
  - Gray code conversion methods: `Gray8`|`Gray16`|`Gray32`|`Gray64`|`Grayn`
  - Convert to/from `big.Int`: `BigInt` | `NewFromBig`
  - Copy/Clone methods: `Copy`|`Clone`|`CopyRange`
+ - Trailing/LeadingZeroes : `TrailingZeroes`|`LeadingZeroes`
 
 
 # Debug version
@@ -32,7 +33,7 @@ when building the `bitstring` package.
 
 **TODO**:
  - RotateLeft/Right ShiftLeft/Right
- - Trailing/Leading zeroes/ones
+ - Trailing/Leading ones
  - Or, And, Xor between bitstrings
  - Reverse
  - Run CI on big|little endian and 32|64 bits (for now only amd64) (see https://github.com/docker/setup-qemu-action)
