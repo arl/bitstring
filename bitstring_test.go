@@ -135,7 +135,7 @@ func TestReverse(t *testing.T) {
 func TestOnesCount(t *testing.T) {
 	bs := New(65)
 	if bs.OnesCount() != 0 {
-		t.Fatalf("defaut constructed Bitstring shouldn't have any bit set, got %d", bs.OnesCount())
+		t.Fatalf("default constructed Bitstring shouldn't have any bit set, got %d", bs.OnesCount())
 	}
 
 	bs.SetBit(0)

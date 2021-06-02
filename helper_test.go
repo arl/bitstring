@@ -3,19 +3,12 @@ package bitstring
 import (
 	"encoding/binary"
 	"fmt"
-	"strconv"
+	"os"
+	"runtime"
 	"strings"
 	"testing"
 	"unsafe"
 )
-
-func atobin(s string) uint64 {
-	i, err := strconv.ParseUint(s, 2, 64)
-	if err != nil {
-		panic(fmt.Sprintf("Can't convert %s to base 2: %s", s, err))
-	}
-	return i
-}
 
 func equalbits(tb testing.TB, got, want *Bitstring) {
 	tb.Helper()
@@ -39,6 +32,31 @@ func equalbits(tb testing.TB, got, want *Bitstring) {
 	}
 }
 
+func checkBits(tb testing.TB, bits []bool, bs *Bitstring) {
+	tb.Helper()
+
+	for i, bit := range bits {
+		if bs.Bit(i) != bit {
+			tb.Errorf("bit %d = %t, want %t", i, bs.Bit(i), bit)
+		}
+	}
+}
+
+func nativeEndian() binary.ByteOrder {
+	i := uint32(1)
+	b := (*[4]byte)(unsafe.Pointer(&i))
+	if b[0] == 1 {
+		return binary.LittleEndian
+	}
+
+	return binary.BigEndian
+}
+
+func TestMain(m *testing.M) {
+	fmt.Printf("%s: %s %d-bit\n", runtime.GOARCH, nativeEndian(), wordsize)
+	os.Exit(m.Run())
+}
+
 func sprintbuf(b []byte) string {
 	var sb strings.Builder
 	for i := range b {
@@ -48,6 +66,7 @@ func sprintbuf(b []byte) string {
 	return sb.String()
 }
 
+//lint:ignore U1000 useful for debugging
 func printbuf(b []byte) {
 	fmt.Println(sprintbuf(b))
 }
@@ -60,39 +79,11 @@ func sprintubits(val uint64, nbits int) string {
 
 // returns a string representing the first n bits of the base-2 representation
 // of val (signed).
+//lint:ignore U1000 useful for debugging
 func sprintsbits(val int64, nbits int) string {
 	if val < 0 {
 		// casting to uint will show us the 2's complement
 		return sprintubits(uint64(val), nbits)
 	}
 	return fmt.Sprintf(fmt.Sprintf("%%0%db", nbits), val)
-}
-
-// prints a string representing the first n bits of the base-2 representation of val.
-//lint:ignore U1000 (unused but useful for debugging)
-func printbits(val, n int) {
-	fmt.Printf(fmt.Sprintf("%%0%db\n", n), val)
-}
-
-var nativeEndian binary.ByteOrder
-
-func init() {
-	i := uint32(1)
-	b := (*[4]byte)(unsafe.Pointer(&i))
-	if b[0] == 1 {
-		nativeEndian = binary.LittleEndian
-	} else {
-		nativeEndian = binary.BigEndian
-	}
-	fmt.Println(nativeEndian, wordsize)
-}
-
-func checkBits(t *testing.T, bits []bool, bs *Bitstring) {
-	t.Helper()
-
-	for i, bit := range bits {
-		if bs.Bit(i) != bit {
-			t.Errorf("bit %d = %t, want %t", i, bs.Bit(i), bit)
-		}
-	}
 }
