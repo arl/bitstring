@@ -2,6 +2,7 @@ package bitstring
 
 import (
 	"math"
+	"math/bits"
 	"unsafe"
 )
 
@@ -37,73 +38,19 @@ func transferbits(dst, src, mask uint64) uint64 {
 }
 
 // lsb returns the offset of the lowest significant set bit in v. That is, the
-// index of the rightmost 1.
+// index of the rightmost 1 in the bitstring string representation.
 //
-// Note: lsb(0) is meaningless, it's the caller responsibility to not use the
-// result of lsb(0).
+// Warning: msb(0) = 64 but calling msb(0) makes no sense anyway.
 func lsb(v uint64) uint64 {
-	var num uint64
-
-	if (v & 0xffffffff) == 0 {
-		num += 32
-		v >>= 32
-	}
-	if (v & 0xffff) == 0 {
-		num += 16
-		v >>= 16
-	}
-	if (v & 0xff) == 0 {
-		num += 8
-		v >>= 8
-	}
-	if (v & 0xf) == 0 {
-		num += 4
-		v >>= 4
-	}
-	if (v & 0x3) == 0 {
-		num += 2
-		v >>= 2
-	}
-	if (v & 0x1) == 0 {
-		num++
-	}
-	return num
+	return uint64(bits.TrailingZeros64(v))
 }
 
 // msb returns the offset of the most significant set bit in v. That is, the
-// index of the leftmost 1.
+// index of the leftmost 1 in the bitstring string representation.
 //
-// Note: msb(0) is meaningless, it's the caller responsibility to not use the
-// result of msb(0).
+// Warning: msb(0) = math.MaxUint64 but calling msb(0) makes no sense anyway.
 func msb(v uint64) uint64 {
-	var num uint64
-
-	if (v & 0xffffffff00000000) != 0 {
-		num += 32
-		v >>= 32
-	}
-	if (v & 0xffff0000) != 0 {
-		num += 16
-		v >>= 16
-	}
-	if (v & 0xff00) != 0 {
-		num += 8
-		v >>= 8
-	}
-	if (v & 0xf0) != 0 {
-		num += 4
-		v >>= 4
-	}
-	if (v & 0xc) != 0 {
-		num += 2
-		v >>= 2
-	}
-	if (v & 0x2) != 0 {
-		num++
-		v >>= 1
-	}
-
-	return num
+	return uint64(63 - bits.LeadingZeros64(v))
 }
 
 // fastmsbLittleEndian is faster version of msb that only works on little endian
