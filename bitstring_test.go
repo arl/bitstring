@@ -5,55 +5,68 @@ import (
 	"math/rand"
 	"strings"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestNew(t *testing.T) {
 	bs := New(100)
 
-	assert.Equal(t, 100, bs.Len())
+	if bs.Len() != 100 {
+		t.Errorf("len = %d, want 100", bs.Len())
+	}
+
 	for i := 0; i < bs.Len(); i++ {
-		assert.False(t, bs.Bit(i))
+		if bs.Bit(i) {
+			t.Error("bit i = 1, want 0")
+		}
 	}
 }
 
 func TestRandom(t *testing.T) {
 	rng := rand.New(rand.NewSource(99))
-
-	assert.Equal(t, Random(100, rng).Len(), 100)
+	bs := Random(100, rng)
+	if bs.Len() != 100 {
+		t.Errorf("len = %d, want 100", bs.Len())
+	}
 }
 
 func TestSetBit(t *testing.T) {
 	bs := New(69)
 
+	bits := make([]bool, 69)
+
 	bs.SetBit(1)
 	bs.SetBit(4)
+	bs.SetBit(65)
+	bits[1] = true
+	bits[4] = true
+	bits[65] = true
+	checkBits(t, bits, bs)
 
-	assert.False(t, bs.Bit(0))
-	assert.True(t, bs.Bit(1))
-	assert.False(t, bs.Bit(2))
-	assert.False(t, bs.Bit(3))
-	assert.True(t, bs.Bit(4))
-
-	bs.ClearBit(4)
-	assert.False(t, bs.Bit(4))
+	bs.ClearBit(65)
+	bits[65] = false
+	checkBits(t, bits, bs)
 }
 
 func TestFlipBit(t *testing.T) {
 	bs := New(69)
 
-	bs.FlipBit(2)
-	assert.True(t, bs.Bit(2))
+	bits := make([]bool, 69)
 
 	bs.FlipBit(2)
-	assert.False(t, bs.Bit(2))
+	bits[2] = !bits[2]
+	checkBits(t, bits, bs)
+
+	bs.FlipBit(2)
+	bits[2] = !bits[2]
+	checkBits(t, bits, bs)
 
 	bs.FlipBit(67)
-	assert.True(t, bs.Bit(67))
+	bits[67] = !bits[67]
+	checkBits(t, bits, bs)
 
 	bs.FlipBit(67)
-	assert.False(t, bs.Bit(67))
+	bits[67] = !bits[67]
+	checkBits(t, bits, bs)
 }
 
 func TestString(t *testing.T) {
@@ -77,17 +90,16 @@ func TestString(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewFromString(tt.str)
+			bs, err := NewFromString(tt.str)
 			if !tt.valid {
-				assert.Nil(t, got)
-				assert.Error(t, err)
+				if bs != nil || err == nil {
+					t.Errorf("invalid string, got (%s, %v) want (nil, error)", bs, err)
+				}
 				return
 			}
-			assert.NotNil(t, got)
-			assert.NoError(t, err)
-
-			// Convert back to string
-			assert.Equal(t, tt.str, got.String())
+			if bs == nil || err != nil || bs.String() != tt.str {
+				t.Errorf("valid string, got (%s, %v) want (%s, nil)", bs, err, tt.str)
+			}
 		})
 	}
 }
@@ -100,7 +112,6 @@ func TestReverse(t *testing.T) {
 		"00000001",
 		"11110000000000000000000000000000000000000000000000000000000000000111",
 		"10000000000000000000000000000000000000000000000000000000000000011111",
-		fmt.Sprintf("%s000000000000000000", strings.Repeat("1", 1029)),
 		"000000000000000000111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
 	}
 	for _, str := range tests {
@@ -110,15 +121,22 @@ func TestReverse(t *testing.T) {
 
 			bs.Reverse()
 
-			assert.Equal(t, string(reverseBytes([]byte(str))), bs.String())
-			assert.Equal(t, ones, bs.OnesCount())
+			revstr := string(reverseBytes([]byte(str)))
+			if bs.String() != revstr {
+				t.Errorf("reversed string = %s, want %s", bs.String(), revstr)
+			}
+			if bs.OnesCount() != ones {
+				t.Errorf("reversed string got %d ones, want %d", bs.OnesCount(), ones)
+			}
 		})
 	}
 }
 
 func TestOnesCount(t *testing.T) {
 	bs := New(65)
-	assert.Zero(t, bs.OnesCount())
+	if bs.OnesCount() != 0 {
+		t.Fatalf("defaut constructed Bitstring shouldn't have any bit set, got %d", bs.OnesCount())
+	}
 
 	bs.SetBit(0)
 	bs.SetBit(31)
@@ -126,21 +144,30 @@ func TestOnesCount(t *testing.T) {
 	bs.SetBit(33)
 	bs.SetBit(63)
 	bs.SetBit(64)
-	setBits := bs.OnesCount()
-	assert.EqualValues(t, 6, setBits)
+
+	want := 6
+	if got := bs.OnesCount(); got != want {
+		t.Errorf("%s got %d ones, want %d", bs, got, want)
+	}
 }
 
 func TestZeroesCount(t *testing.T) {
 	bs := New(12)
-	assert.EqualValues(t, 12, bs.ZeroesCount())
+	want := 12
+	if got := bs.ZeroesCount(); got != want {
+		t.Errorf("%s got %d zeroes, want %d", bs, got, want)
+	}
 
 	bs.SetBit(0)
 	bs.SetBit(5)
 	bs.SetBit(6)
 	bs.SetBit(9)
 	bs.SetBit(10)
-	setBits := bs.ZeroesCount()
-	assert.EqualValues(t, 7, setBits)
+
+	want = 7
+	if got := bs.ZeroesCount(); got != want {
+		t.Errorf("%s got %d zeroes, want %d", bs, got, want)
+	}
 }
 
 func TestClone(t *testing.T) {
@@ -150,8 +177,7 @@ func TestClone(t *testing.T) {
 	bs.SetBit(7)
 	bs.SetBit(8)
 
-	cpy := bs.Clone()
-	equalbits(t, cpy, bs)
+	equalbits(t, bs.Clone(), bs)
 }
 
 func TestCopy(t *testing.T) {
@@ -188,22 +214,36 @@ func TestEquals(t *testing.T) {
 	org.SetBit(5)
 	org.SetBit(8)
 
-	assert.True(t, org.Equals(org))
-	assert.False(t, org.Equals(nil))
-	assert.False(t, org.Equals(&Bitstring{}))
+	if !org.Equals(org) {
+		t.Errorf("org != org, want org == org")
+	}
+	if org.Equals(nil) {
+		t.Errorf("org == nil, want org != nil")
+	}
+
+	if org.Equals(&Bitstring{}) {
+		t.Errorf("org == default constructed Bitstring, want !=")
+	}
 
 	clone := org.Clone()
-	assert.Truef(t, clone.Equals(org), "different bitstrings, clone=%s, org=%s", clone, org)
+	if !clone.Equals(org) {
+		t.Errorf("different bitstrings, clone=%s, org=%s", clone, org)
+	}
 
 	clone.FlipBit(0)
-	assert.Falsef(t, clone.Equals(org), "same bitstrings, clone=%s, org=%s", clone, org)
+	if clone.Equals(org) {
+		t.Errorf("same bitstrings, clone=%s, org=%s", clone, org)
+	}
 
 	// Bitstrings of different lengths but with the same bits set should not be equal.
 	bs2 := New(9)
 	bs2.SetBit(2)
 	bs2.SetBit(5)
 	bs2.SetBit(8)
-	assert.False(t, bs2.Equals(org))
+
+	if bs2.Equals(org) {
+		t.Errorf("same bitstrings, bs2=%s, org=%s", bs2, org)
+	}
 }
 
 func trimLeadingZeroes(s string) string {
@@ -233,7 +273,10 @@ func TestBig(t *testing.T) {
 			bs, _ := NewFromString(num)
 			bi := bs.BigInt()
 			sbig := fmt.Sprintf("%b", bi)
-			assert.Equal(t, trimLeadingZeroes(num), sbig)
+			want := trimLeadingZeroes(num)
+			if sbig != want {
+				t.Errorf("got big = %s, want %s", sbig, want)
+			}
 
 			// Create a bitstring from the binary string representation, create
 			// a Bitstring from it and compare the significant bits.
@@ -241,7 +284,10 @@ func TestBig(t *testing.T) {
 
 			// Remove leading zeroes since a big int doesn't have leading zeroes.
 			got := bs.String()[bs.LeadingZeroes():]
-			assert.Equal(t, got, bs2.String())
+			want = bs2.String()
+			if got != want {
+				t.Errorf("got big = %s, want %s", got, want)
+			}
 		})
 	}
 }

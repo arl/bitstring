@@ -86,3 +86,13 @@ func init() {
 	}
 	fmt.Println(nativeEndian, wordsize)
 }
+
+func checkBits(t *testing.T, bits []bool, bs *Bitstring) {
+	t.Helper()
+
+	for i, bit := range bits {
+		if bs.Bit(i) != bit {
+			t.Errorf("bit %d = %t, want %t", i, bs.Bit(i), bit)
+		}
+	}
+}
