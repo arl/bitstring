@@ -34,4 +34,3 @@ when building the `bitstring` package.
 **TODO**:
  - RotateLeft/Right ShiftLeft/Right
  - Or, And, Xor between bitstrings
- - Run CI on big|little endian and 32|64 bits (with qemu) (see https://github.com/docker/setup-qemu-action)
