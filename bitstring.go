@@ -177,6 +177,11 @@ func (bs *Bitstring) Reverse() {
 	rightShiftBits(bs.data, bitoffset(uint64(64-bs.length)))
 }
 
+// Flip flips all bits (replaces ones with zeroes and zeroes with ones).
+func (bs *Bitstring) Flip() {
+	bs.FlipRange(0, bs.length)
+}
+
 // NewFromBig creates a new Bitstring using the absolute value of the big.Int
 // bi.
 //

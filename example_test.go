@@ -126,3 +126,12 @@ func ExampleBitstring_FlipRange() {
 	fmt.Println(bs)
 	// Output: 11001100
 }
+
+func ExampleBitstring_Flip() {
+	bs, _ := NewFromString("11110000")
+
+	bs.Flip()
+
+	fmt.Println(bs)
+	// Output: 00001111
+}
