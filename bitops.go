@@ -3,7 +3,6 @@ package bitstring
 import (
 	"math"
 	"math/bits"
-	"unsafe"
 )
 
 const wordsize = 32 << (^uint(0) >> 63) // 32 or 64
@@ -51,20 +50,6 @@ func lsb(v uint64) uint64 {
 // Warning: msb(0) = math.MaxUint64 but calling msb(0) makes no sense anyway.
 func msb(v uint64) uint64 {
 	return uint64(63 - bits.LeadingZeros64(v))
-}
-
-// fastmsbLittleEndian is faster version of msb that only works on little endian
-// architectures. About 50% faster than msb on amd64. Rely on the fact that Go
-// uses IEEE 754 floating point representation. Converts v to float64, then
-// extracts the exponent bits of the IEEE754 representation.
-func fastmsbLittleEndian(v uint64) uint64 {
-	if v == math.MaxUint64 {
-		return 63
-	}
-
-	f := float64(v)
-	arr := *(*[2]uint32)(unsafe.Pointer(&f))
-	return uint64(arr[1]>>20 - 1023)
 }
 
 func reverseBytes(buf []byte) []byte {
