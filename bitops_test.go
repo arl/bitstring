@@ -122,13 +122,13 @@ func Test_msb(t *testing.T) {
 func Test_ispow2(t *testing.T) {
 	for i := uint64(0); i < 64; i++ {
 		t.Run(fmt.Sprintf("1<<%d", i), func(t *testing.T) {
-			n, ok := ispow2(1 << i)
+			n, ok := isPow2(1 << i)
 			assert.Truef(t, ok, "ispow2(1<<%d)", i)
 			assert.Equalf(t, i, n, "ispow2(1<<%d)", i)
 			if i == 0 {
 				return
 			}
-			_, ok = ispow2(1<<i + 1)
+			_, ok = isPow2(1<<i + 1)
 			assert.Falsef(t, ok, "ispow2(1<<%d)", i)
 		})
 	}
