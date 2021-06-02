@@ -388,20 +388,9 @@ func (bs *Bitstring) TrailingZeroes() int {
 // (i.e the number of consecutives 1's starting from the LSB (least significant
 // bit).
 func (bs *Bitstring) TrailingOnes() int {
-	bitoff := int(bitoffset(uint64(bs.length)))
-	last := len(bs.data) - 1
-
 	n := 0
 	for i := 0; i < len(bs.data); i++ {
 		trailing := bits.TrailingZeros64(^bs.data[i])
-
-		if i == last && bitoff != 0 && trailing == 64 {
-			// There's one specific case we need to take care of: if the last
-			// word if 0 and the bitstring length is not a multiple of the
-			// wordsize, then the effective number of trailing bits is not 64,
-			// we need to limit it to the number of useful bits only.
-			trailing = bitoff
-		}
 
 		n += trailing
 		if trailing != 64 {
