@@ -79,12 +79,16 @@ func NewFromString(s string) (*Bitstring, error) {
 	return bs, nil
 }
 
-// Len returns the length if bs, that is the number of bits it contains.
+// Len returns the length of bs in bits.
 func (bs *Bitstring) Len() int {
 	return int(bs.length)
 }
 
-// Data returns the bitstring underlying slice.
+// Bits returns raw access to the bitstring underlying uint64 slice. The result
+// and bs share the same underlying array.
+//
+// Bits is intended to support implementation of missing low-level Bitstring
+// functionality outside this package; it should be avoided otherwise.
 func (bs *Bitstring) Data() []uint64 {
 	return bs.data
 }
@@ -366,9 +370,9 @@ func (bs *Bitstring) TrailingZeroes() int {
 
 		if i == last && bitoff != 0 && trailing == 64 {
 			// There's one specific case we need to take care of: if the last
-			// word if 0 and the bitstring length is not a multiple of the
-			// wordsize, then the effective number of trailing bits is not 64,
-			// we need to limit it to the number of useful bits only.
+			// word is 0 and the bitstring length is not a multiple of 64 then
+			// the actual number of trailing bits is not 64, we need to limit it
+			// to the number of useful bits only.
 			trailing = bitoff
 		}
 
