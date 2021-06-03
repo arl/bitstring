@@ -10,8 +10,8 @@ import (
 	"strings"
 )
 
-// This program generates the lookup table used to reverse the bits in a byte,
-// based on https://graphics.stanford.edu/~seander/bithacks.html#BitReverseTable
+// This program generates the lookup table used to reverse bits in a byte in O(1).
+// Based on https://graphics.stanford.edu/~seander/bithacks.html#BitReverseTable
 
 func main() {
 	var sb strings.Builder

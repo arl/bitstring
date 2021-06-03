@@ -1,3 +1,3 @@
 package bitstring
 
-//go:generate go run reverse_lut_generate.go
+//go:generate go run internal/reverse_lut/generate.go
