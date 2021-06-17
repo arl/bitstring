@@ -8,27 +8,39 @@ import (
 const wordsize = 32 << (^uint(0) >> 63) // 32 or 64
 
 // bitmask returns a mask where only the nth bit of a word is set.
-func bitmask(n uint64) uint64 { return 1 << n }
+func bitmask(n uint64) uint64 {
+	return 1 << n
+}
 
 // wordoffset returns, for a given bit n of a bit string, the offset
 // of the word that contains bit n.
-func wordoffset(n uint64) uint64 { return n / 64 }
+func wordoffset(n uint64) uint64 {
+	return n / 64
+}
 
 // bitoffset returns, for a given bit n of a bit string, the offset of that bit
 // with respect to the first bit of the word that contains it.
-func bitoffset(n uint64) uint64 { return n & (64 - 1) }
+func bitoffset(n uint64) uint64 {
+	return n & (64 - 1)
+}
 
 // mask returns a mask that keeps the bits in the range [l, h) behavior
 // undefined if any argument is greater than the size of a machine word.
-func mask(l, h uint64) uint64 { return lomask(h) & himask(l) }
+func mask(l, h uint64) uint64 {
+	return lomask(h) & himask(l)
+}
 
-// lomask returns a mask to keep the n LSB (least significant bits). Undefined
+// lomask returns a mask where the n least significant bits are set. Undefined
 // behavior if n is greater than 64.
-func lomask(n uint64) uint64 { return math.MaxUint64 >> (64 - n) }
+func lomask(n uint64) uint64 {
+	return math.MaxUint64 >> (64 - n)
+}
 
-// himask returns a mask to keep the n MSB (most significant bits). Undefined
-// behavior if n is greater than 64.
-func himask(n uint64) uint64 { return math.MaxUint64 << n }
+// himask returns a mask where the most significant bits are set, starting from
+// offset n. Undefined behavior if n is greater than 64.
+func himask(n uint64) uint64 {
+	return math.MaxUint64 << n
+}
 
 // transferbits returns the word that results from transferring some bits from
 // src to dst, where set bits in mask specify the bits to transfer.
