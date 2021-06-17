@@ -416,13 +416,9 @@ func rotate3(nums []uint64, k int) {
 		return
 	}
 
-	// fmt.Printf("rotating left(%d) -> %v\n", k, nums)
 	reverse(nums)
-	// fmt.Println("reverse -> ", nums)
 	reverse(nums[:k])
-	// fmt.Println("reverse -> ", nums)
 	reverse(nums[k:])
-	// fmt.Println("reverse -> ", nums)
 }
 
 // RotateRight rotates the bitstring by k bits to the right.
@@ -432,7 +428,7 @@ func (bs *Bitstring) RotateRight(k int) {
 
 // RotateLeft rotates the bitstring by k bits to the left.
 // TODO: document whether k can be negative
-func (bs *Bitstring) rotateLeft(k int) {
+func (bs *Bitstring) RotateLeft(k int) {
 	// Remove full circles; reduce k to its smallest equivalent value.
 	k %= bs.length
 
@@ -447,7 +443,8 @@ func (bs *Bitstring) rotateLeft(k int) {
 
 	// kbits is the number of bits we must rotate bs to the left in order to
 	// complete the full rotation. Rotate each element of the bs.data slice of
-	// kbits to the left, and carry the shifted kbits to the next element.
+	// kbits to the left, and carry the k leftmost shifted bits to the next
+	// element.
 	kbits := k % 64
 	if kbits == 0 {
 		return
@@ -463,119 +460,47 @@ func (bs *Bitstring) rotateLeft(k int) {
 		bs.data[i], carry = w, tmp
 	}
 
-	// _Manually_ handle the last word since the number of bits to rotate might
-	// not be 64 (if the bitstring length is not a multiple of 64).
-	w := bits.RotateLeft64(bs.data[i], kbits)
-	tmp := w & lomask(uint64(kbits)) // extract the range of bits to carry over to next word.
-	w &= ^lomask(uint64(kbits))      // clear the range of bits of w before applying carry from previous word.
-	w |= carry
-	bs.data[i], carry = w, tmp
+	// _Manually_ handle the last word since we may not have to consider all
+	// bits, in case the bitstring length is not a multiple of 64.
+	// w := bits.RotateLeft64(bs.data[i], kbits)
+	// tmp := w & lomask(uint64(kbits)) // extract the range of bits to carry over to next word.
+	// w &= ^lomask(uint64(kbits))      // clear the range of bits of w before applying carry from previous word.
+	// w |= carry
+	// bs.data[i], carry = w, tmp
 
-	// Report last word carry onto the first word.
-	bs.data[0] |= carry
-
-	// look for interesting stuff in /usr/local/go/src/runtime/mpallocbits.go
-
-	// nlastbits := bs.length % 64 // number of bits in the last word.
-
-	// carry |= mask(uint64(nlastbits), uint64(nlastbits+kbits)) >> nlastbits
-	// bs.data[0] |= carry
-	// bs.data[len(bs.data)-1] &= lomask((uint64(kbits)))
-	//  nlastbits = 4
-	//  k = 10
-	// 0000000000000000000000000000000000000000000000000000000000001111
-
-	// 0000000000000000000000000000000000000000000000000011110000000000
-
-}
-func (bs *Bitstring) RotateLeft(k int) {
-	bs.rotateLeft(k)
-}
-
-/*
-// RotateLeft rotates the bitstring by k bits to the left.
-func (bs *Bitstring) RotateLeft(k int) {
-	fmt.Println("RotateLeft(", k, ")")
-	// Reduce k to its smallest value.
-	k %= bs.length
-
-	// First move words.
-	nwords := k / 64
-	if nwords != 0 {
-		rotate3(bs.data, nwords)
-	}
-
-	// Remaining bits to move (i.e always less than 64).
-	lastbits := uint64(bs.length % 64)
+	// _Manually_ handle the last word since we may not have to consider all
+	// bits, in case the bitstring length is not a multiple of 64.
+	lastbits := bs.length % 64
 	if lastbits == 0 {
-		return
+		lastbits = 64
 	}
-
-	kbits := uint64(k - nwords*64)
-	// if nbits == 0 {
-	// 	return
-	// }
-
-	fmt.Println("k bits to move", kbits, "nbits in last word ", lastbits)
-	if uint64(bs.length%64) == 0 {
-		panic("impossible")
-	}
-
-	var carry uint64
-	for i := 0; i < len(bs.data); i++ {
+	if kbits+lastbits > 64 {
+		// Rotation will move the leftmost bits to the right.
+		// lastbits = 60
+		// ----111010101010010111010101000101101011011010001010101001011001 << 10     ->  101010010111010101000101101011011010001010101001011001----111010
 		w := bs.data[i]
-		hmask := himask(64 - kbits)
-		// fmt.Printf("%2b\n", )
-		tmp := w & hmask
-		tmp >>= (64 - kbits)
+		tmp := w & mask(uint64(lastbits-kbits), uint64(lastbits))
+		tmp >>= (lastbits - kbits)
 		w <<= kbits
 		w |= carry
+		w &= lomask(uint64(lastbits)) // that's strange that we don't need it
+		bs.data[i] = w
 		carry = tmp
+	} else {
+		// No bits will fall off at the end, same as shift.
+		// ------------------------------------------------------------1001 << 58    ->  --1001----------------------------------------------------------
+		// ------1010101010010111010101000101101011011010001010101001011001 << 4     ->  --1010101010010111010101000101101011011010001010101001011001----
+		// TODO (we can use a simple shift here rather than a rotation)
+		w := bits.RotateLeft64(bs.data[i], kbits)
+		// apply carry
+		w |= carry
+		// extract the range of bits to carry over to next word.
+		carry = w & mask(uint64(lastbits), uint64(lastbits+kbits)) >> lastbits
+		// reset extra bits
+		w &= lomask(uint64(lastbits))
 		bs.data[i] = w
 	}
 
-	if lastbits+kbits > 64 {
-	} else {
-		// all the bits of the
-	}
-
-	// use circular shift for the last word?
-	// https://en.wikipedia.org/wiki/Circular_shift
-
-		// var carry uint64
-		// for i := 0; i < len(bs.data); i++ {
-		// 	bs.data[i], carry = bs.data[i]<<nbits|carry, bs.data[i]&himask(nbits)>>(64-nbits)
-		// }
-	fmt.Printf("before last bs.data[len(bs.data)-1] %v\n", bs.data)
-
-	// 10000
-	// ____
-
-	nbitslastw := uint64(bs.length % 64) // number of useful bits of last word
-	bs.data[0] |= (carry >> (64 - nbitslastw))
-
-	carry = bs.data[len(bs.data)-1] & mask(nbitslastw, nbitslastw+nbits)
-	carry = carry >> nbitslastw
+	// Report last word carry onto the first word.
 	bs.data[0] |= carry
-
-
-		// // work but not for 37
-		// nbitslastw := uint64(bs.length % 64) // number of useful bits of last word
-		// bs.data[0] |= (carry >> (nbitslastw))
-
-		// carry = bs.data[len(bs.data)-1] & mask(nbitslastw, nbitslastw+nbits)
-		// carry = carry >> nbitslastw
-		// bs.data[0] |= carry
-
-
-	// carry = bs.data[len(bs.data)-1] & mask(nbitslastw, nbitslastw+nbits)
-	// bs.data[0] |= (carry >> (nbitslastw))
-	// bs.data[len(bs.data)-1] &= lomask(nbitslastw)
-
-		// lastbits := uint64(bs.length % 64) // number of useful bits of last word
-		// bs.data[0] |= (bs.data[len(bs.data)-1] & mask(lastbits, lastbits+nbits)) >> lastbits
-		// bs.data[len(bs.data)-1] &= lomask(lastbits)
-	/
-
 }
-*/
