@@ -454,7 +454,8 @@ func (bs *Bitstring) rotateLeft(k int) {
 	}
 
 	carry := uint64(0)
-	for i := 0; i < len(bs.data); i++ {
+	i := 0
+	for ; i < len(bs.data)-1; i++ {
 		w := bits.RotateLeft64(bs.data[i], kbits)
 		tmp := w & lomask(uint64(kbits)) // extract the range of bits to carry over to next word.
 		w &= ^lomask(uint64(kbits))      // clear the range of bits of w before applying carry from previous word.
@@ -462,10 +463,18 @@ func (bs *Bitstring) rotateLeft(k int) {
 		bs.data[i], carry = w, tmp
 	}
 
-	// look for interesting stuff in /usr/local/go/src/runtime/mpallocbits.go
+	// _Manually_ handle the last word since the number of bits to rotate might
+	// not be 64 (if the bitstring length is not a multiple of 64).
+	w := bits.RotateLeft64(bs.data[i], kbits)
+	tmp := w & lomask(uint64(kbits)) // extract the range of bits to carry over to next word.
+	w &= ^lomask(uint64(kbits))      // clear the range of bits of w before applying carry from previous word.
+	w |= carry
+	bs.data[i], carry = w, tmp
 
 	// Report last word carry onto the first word.
 	bs.data[0] |= carry
+
+	// look for interesting stuff in /usr/local/go/src/runtime/mpallocbits.go
 
 	// nlastbits := bs.length % 64 // number of bits in the last word.
 
