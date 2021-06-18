@@ -2,33 +2,45 @@ package bitstring
 
 import (
 	"math"
-	"unsafe"
+	"math/bits"
 )
 
 const wordsize = 32 << (^uint(0) >> 63) // 32 or 64
 
 // bitmask returns a mask where only the nth bit of a word is set.
-func bitmask(n uint64) uint64 { return 1 << n }
+func bitmask(n uint64) uint64 {
+	return 1 << n
+}
 
 // wordoffset returns, for a given bit n of a bit string, the offset
 // of the word that contains bit n.
-func wordoffset(n uint64) uint64 { return n / 64 }
+func wordoffset(n uint64) uint64 {
+	return n / 64
+}
 
 // bitoffset returns, for a given bit n of a bit string, the offset of that bit
 // with respect to the first bit of the word that contains it.
-func bitoffset(n uint64) uint64 { return n & (64 - 1) }
+func bitoffset(n uint64) uint64 {
+	return n & (64 - 1)
+}
 
 // mask returns a mask that keeps the bits in the range [l, h) behavior
 // undefined if any argument is greater than the size of a machine word.
-func mask(l, h uint64) uint64 { return lomask(h) & himask(l) }
+func mask(l, h uint64) uint64 {
+	return lomask(h) & himask(l)
+}
 
-// lomask returns a mask to keep the n LSB (least significant bits). Undefined
+// lomask returns a mask where the n least significant bits are set. Undefined
 // behavior if n is greater than 64.
-func lomask(n uint64) uint64 { return math.MaxUint64 >> (64 - n) }
+func lomask(n uint64) uint64 {
+	return math.MaxUint64 >> (64 - n)
+}
 
-// himask returns a mask to keep the n MSB (most significant bits). Undefined
-// behavior if n is greater than 64.
-func himask(n uint64) uint64 { return math.MaxUint64 << n }
+// himask returns a mask where the most significant bits are set, starting from
+// offset n. Undefined behavior if n is greater than 64.
+func himask(n uint64) uint64 {
+	return math.MaxUint64 << n
+}
 
 // transferbits returns the word that results from transferring some bits from
 // src to dst, where set bits in mask specify the bits to transfer.
@@ -37,87 +49,19 @@ func transferbits(dst, src, mask uint64) uint64 {
 }
 
 // lsb returns the offset of the lowest significant set bit in v. That is, the
-// index of the rightmost 1.
+// index of the rightmost 1 in the bitstring string representation.
 //
-// Note: lsb(0) is meaningless, it's the caller responsibility to not use the
-// result of lsb(0).
+// Warning: msb(0) = 64 but calling msb(0) makes no sense anyway.
 func lsb(v uint64) uint64 {
-	var num uint64
-
-	if (v & 0xffffffff) == 0 {
-		num += 32
-		v >>= 32
-	}
-	if (v & 0xffff) == 0 {
-		num += 16
-		v >>= 16
-	}
-	if (v & 0xff) == 0 {
-		num += 8
-		v >>= 8
-	}
-	if (v & 0xf) == 0 {
-		num += 4
-		v >>= 4
-	}
-	if (v & 0x3) == 0 {
-		num += 2
-		v >>= 2
-	}
-	if (v & 0x1) == 0 {
-		num++
-	}
-	return num
+	return uint64(bits.TrailingZeros64(v))
 }
 
 // msb returns the offset of the most significant set bit in v. That is, the
-// index of the leftmost 1.
+// index of the leftmost 1 in the bitstring string representation.
 //
-// Note: msb(0) is meaningless, it's the caller responsibility to not use the
-// result of msb(0).
+// Warning: msb(0) = math.MaxUint64 but calling msb(0) makes no sense anyway.
 func msb(v uint64) uint64 {
-	var num uint64
-
-	if (v & 0xffffffff00000000) != 0 {
-		num += 32
-		v >>= 32
-	}
-	if (v & 0xffff0000) != 0 {
-		num += 16
-		v >>= 16
-	}
-	if (v & 0xff00) != 0 {
-		num += 8
-		v >>= 8
-	}
-	if (v & 0xf0) != 0 {
-		num += 4
-		v >>= 4
-	}
-	if (v & 0xc) != 0 {
-		num += 2
-		v >>= 2
-	}
-	if (v & 0x2) != 0 {
-		num++
-		v >>= 1
-	}
-
-	return num
-}
-
-// fastmsbLittleEndian is faster version of msb that only works on little endian
-// architectures. About 50% faster than msb on amd64. Rely on the fact that Go
-// uses IEEE 754 floating point representation. Converts v to float64, then
-// extracts the exponent bits of the IEEE754 representation.
-func fastmsbLittleEndian(v uint64) uint64 {
-	if v == math.MaxUint64 {
-		return 63
-	}
-
-	f := float64(v)
-	arr := *(*[2]uint32)(unsafe.Pointer(&f))
-	return uint64(arr[1]>>20 - 1023)
+	return uint64(63 - bits.LeadingZeros64(v))
 }
 
 func reverseBytes(buf []byte) []byte {
@@ -141,11 +85,12 @@ func rightShiftBits(words []uint64, n uint64) {
 	}
 }
 
-// if n is a power of 2, ispow2 returns (v, true) such that (1<<v) gives n, or
-// (0, false) if n is not a power of 2.
+// isPow2 reports whether n is a power of 2. If that's the case, isPow2 returns
+// (v, true) with v such that (1<<v) gives n, or (0, false) if n is not a power
+// of 2.
 //
 // panics if n == 0
-func ispow2(n uint64) (uint64, bool) {
+func isPow2(n uint64) (uint64, bool) {
 	if (n & -n) != n {
 		// n is not a power of 2
 		return 0, false

@@ -79,12 +79,16 @@ func NewFromString(s string) (*Bitstring, error) {
 	return bs, nil
 }
 
-// Len returns the length if bs, that is the number of bits it contains.
+// Len returns the length of bs in bits.
 func (bs *Bitstring) Len() int {
 	return int(bs.length)
 }
 
-// Data returns the bitstring underlying slice.
+// Bits returns raw access to the bitstring underlying uint64 slice. The result
+// and bs share the same underlying array.
+//
+// Bits is intended to support implementation of missing low-level Bitstring
+// functionality outside this package; it should be avoided otherwise.
 func (bs *Bitstring) Data() []uint64 {
 	return bs.data
 }
@@ -175,6 +179,11 @@ func (bs *Bitstring) Reverse() {
 	}
 
 	rightShiftBits(bs.data, bitoffset(uint64(64-bs.length)))
+}
+
+// Flip flips all bits (replaces ones with zeroes and zeroes with ones).
+func (bs *Bitstring) Flip() {
+	bs.FlipRange(0, bs.length)
 }
 
 // NewFromBig creates a new Bitstring using the absolute value of the big.Int
@@ -281,8 +290,9 @@ func (bs *Bitstring) Equals(other *Bitstring) bool {
 	return false
 }
 
-// LeadingZeroes returns the number of leading 0 bits in bs. (i.e the number of
-// zeroes in the leftmost side of the string representation).
+// LeadingZeroes returns the number of leading bits that are set to 0 in bs.
+// (i.e the number of consecutives 0's starting from the MSB (most significant
+// bit).
 func (bs *Bitstring) LeadingZeroes() int {
 	bitoff := int(bitoffset(uint64(bs.length)))
 	start := len(bs.data) - 1
@@ -313,8 +323,43 @@ func (bs *Bitstring) LeadingZeroes() int {
 	return n
 }
 
-// TrailingZeroes returns the number of leading 0 bits in bs. (i.e the number of
-// zeroes in the rightmost side of the string representation).
+// LeadingOnes returns the number of leading bits that are set to 1 in bs. (i.e
+// the number of consecutives 1's starting from the MSB (most significant bit).
+func (bs *Bitstring) LeadingOnes() int {
+	bitoff := int(bitoffset(uint64(bs.length)))
+	start := len(bs.data) - 1
+
+	n := 0
+	for i := start; i >= 0; i-- {
+		// We treat the first word separately if the bistring length is not a
+		// multiple of the wordsize because in this case we must omit the 'extra
+		// bits' from the count the count of leading zeroes.
+		if i == start && bitoff != 0 {
+			leading := bits.LeadingZeros64(lomask(uint64(bitoff)) ^ bs.data[i])
+
+			// Limit to 'off' the number of bits we count.
+			leading -= 64 - bitoff
+			n += leading
+			if leading != bitoff {
+				break // early exit if useful bits are not all 0s.
+			}
+		} else {
+			leading := bits.LeadingZeros64(^bs.data[i])
+
+			// Subsequent words
+			n += leading
+			if leading != 64 {
+				break
+			}
+		}
+	}
+
+	return n
+}
+
+// TrailingZeroes returns the number of trailing bits that are set to 0 in bs.
+// (i.e the number of consecutives 0's starting from the LSB (least significant
+// bit).
 func (bs *Bitstring) TrailingZeroes() int {
 	bitoff := int(bitoffset(uint64(bs.length)))
 	last := len(bs.data) - 1
@@ -325,9 +370,9 @@ func (bs *Bitstring) TrailingZeroes() int {
 
 		if i == last && bitoff != 0 && trailing == 64 {
 			// There's one specific case we need to take care of: if the last
-			// word if 0 and the bitstring length is not a multiple of the
-			// wordsize, then the effective number of trailing bits is not 64,
-			// we need to limit it to the number of useful bits only.
+			// word is 0 and the bitstring length is not a multiple of 64 then
+			// the actual number of trailing bits is not 64, we need to limit it
+			// to the number of useful bits only.
 			trailing = bitoff
 		}
 
@@ -336,18 +381,126 @@ func (bs *Bitstring) TrailingZeroes() int {
 			break
 		}
 	}
-
 	return n
 }
 
-/*
-// RotateLeft rotates the bitstring by (k mod len) bits.
-func (bs *Bitstring) RotateLeft(k int) {
-	panic("unimplemented")
+// TrailingOnes returns the number of trailing bits that are set to 1 in bs.
+// (i.e the number of consecutives 1's starting from the LSB (least significant
+// bit).
+func (bs *Bitstring) TrailingOnes() int {
+	n := 0
+	for i := 0; i < len(bs.data); i++ {
+		trailing := bits.TrailingZeros64(^bs.data[i])
+
+		n += trailing
+		if trailing != 64 {
+			break
+		}
+	}
+	return n
 }
 
-// RotateRight rotates the bitstring by (k mod len) bits.
-func (bs *Bitstring) RotateRight(k int) {
-	panic("unimplemented")
+func reverse(buf []uint64) []uint64 {
+	for i := 0; i < len(buf)/2; i++ {
+		buf[i], buf[len(buf)-i-1] = buf[len(buf)-i-1], buf[i]
+	}
+	return buf
 }
-*/
+
+func rotate3(nums []uint64, k int) {
+	k = k % len(nums)
+	if k < 0 {
+		panic(fmt.Sprintf("rotate3 with k negative (%d)", k))
+	}
+	if k == 0 {
+		return
+	}
+
+	reverse(nums)
+	reverse(nums[:k])
+	reverse(nums[k:])
+}
+
+// RotateRight rotates the bitstring by k bits to the right.
+func (bs *Bitstring) RotateRight(k int) {
+	bs.RotateLeft(bs.length - k%bs.length)
+}
+
+// RotateLeft rotates the bitstring by k bits to the left.
+// TODO: document whether k can be negative
+func (bs *Bitstring) RotateLeft(k int) {
+	// Remove full circles; reduce k to its smallest equivalent value.
+	k %= bs.length
+
+	// Before digging into bit twiddling, we first rotate bs by the largest
+	// multiple of 64 we can, we do a rotation of the slice elements.
+	kwords := k / 64
+	if kwords != 0 {
+		rotate3(bs.data, kwords)
+	}
+
+	// XXXX XXXX XXXX
+
+	// kbits is the number of bits we must rotate bs to the left in order to
+	// complete the full rotation. Rotate each element of the bs.data slice of
+	// kbits to the left, and carry the k leftmost shifted bits to the next
+	// element.
+	kbits := k % 64
+	if kbits == 0 {
+		return
+	}
+
+	carry := uint64(0)
+	i := 0
+	for ; i < len(bs.data)-1; i++ {
+		w := bits.RotateLeft64(bs.data[i], kbits)
+		tmp := w & lomask(uint64(kbits)) // extract the range of bits to carry over to next word.
+		w &= ^lomask(uint64(kbits))      // clear the range of bits of w before applying carry from previous word.
+		w |= carry
+		bs.data[i], carry = w, tmp
+	}
+
+	// _Manually_ handle the last word since we may not have to consider all
+	// bits, in case the bitstring length is not a multiple of 64.
+	// w := bits.RotateLeft64(bs.data[i], kbits)
+	// tmp := w & lomask(uint64(kbits)) // extract the range of bits to carry over to next word.
+	// w &= ^lomask(uint64(kbits))      // clear the range of bits of w before applying carry from previous word.
+	// w |= carry
+	// bs.data[i], carry = w, tmp
+
+	// _Manually_ handle the last word since we may not have to consider all
+	// bits, in case the bitstring length is not a multiple of 64.
+	lastbits := bs.length % 64
+	if lastbits == 0 {
+		lastbits = 64
+	}
+	if kbits+lastbits > 64 {
+		// Rotation will move the leftmost bits to the right.
+		// lastbits = 60
+		// ----111010101010010111010101000101101011011010001010101001011001 << 10     ->  101010010111010101000101101011011010001010101001011001----111010
+		w := bs.data[i]
+		tmp := w & mask(uint64(lastbits-kbits), uint64(lastbits))
+		tmp >>= (lastbits - kbits)
+		w <<= kbits
+		w |= carry
+		w &= lomask(uint64(lastbits)) // that's strange that we don't need it
+		bs.data[i] = w
+		carry = tmp
+	} else {
+		// No bits will fall off at the end, same as shift.
+		// ------------------------------------------------------------1001 << 58    ->  --1001----------------------------------------------------------
+		// ------1010101010010111010101000101101011011010001010101001011001 << 4     ->  --1010101010010111010101000101101011011010001010101001011001----
+		// TODO (we can use a simple shift here rather than a rotation)
+		w := bits.RotateLeft64(bs.data[i], kbits)
+		// apply carry
+		w |= carry
+		// extract the range of bits to carry over to next word.
+		carry = w & mask(uint64(lastbits), uint64(lastbits+kbits)) >> lastbits
+		// reset extra bits
+		w &= lomask(uint64(lastbits))
+		bs.data[i] = w
+	}
+
+	// Report last word carry onto the first word.
+	bs.data[0] |= carry
+}
