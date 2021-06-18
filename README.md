@@ -22,7 +22,7 @@ Package `bitstring` implements a fixed length bit string type and bit manipulati
  - Trailing/Leading Zeroes/Ones : `TrailingZeroes`|`LeadingZeroes`|`TrailingOnes`|`LeadingOnes`
 
 
-## Debug version
+## Debug versionhttps://bitstring.readthedocs.io/en/latest/
 
 By default, bit offsets arguments to `bitstring` methods are not checked. This
 allows not to pay the performance penalty of always checking offsets, in
@@ -34,3 +34,5 @@ when building the `bitstring` package.
 **TODO**:
  - RotateLeft/Right ShiftLeft/Right
  - Or, And, Xor between bitstrings
+
+have a look at  https://bitstring.readthedocs.io/en/latest/
